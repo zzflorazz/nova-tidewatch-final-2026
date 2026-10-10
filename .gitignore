@@ -7,5 +7,3 @@ __pycache__/
 data/*.csv
 # 示例数据集需要入库（覆盖 *_example.csv 和 *.example.csv 两种命名）
 !data/*example.csv
-report/*.png
-report/*.html
