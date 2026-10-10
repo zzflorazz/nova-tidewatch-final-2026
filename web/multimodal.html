@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TideWatch 多模态交互</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* ===== E2 多模态专属样式（复用 style.css 桌面端主题） ===== */
+  .mm-section {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 20px;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px 8px;
+  }
+  @media (max-width: 980px) { .mm-section { grid-template-columns: 1fr; } }
+
+  .mm-panel {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .mm-panel h3 { margin: 0 0 12px; font-size: 16px; }
+
+  /* 摄像头 */
+  .cam-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+  }
+  .cam-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  #overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #cam-placeholder {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); font-size: 14px;
+  }
+  .cam-tools { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+  .meta { color: var(--text-dim); font-size: 13px; }
+
+  button.mm-btn {
+    min-height: 40px;
+    padding: 8px 18px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter .15s, transform .1s;
+  }
+  button.mm-btn:hover { filter: brightness(1.15); }
+  button.mm-btn:active { transform: scale(.97); }
+  button.mm-btn:disabled { opacity: .5; cursor: not-allowed; }
+  button.mm-btn.danger { background: var(--danger); }
+  button.mm-btn.ok { background: var(--ok); }
+
+  /* 拍照记录 */
+  #photo-box { margin-top: 12px; }
+  #photo-box img {
+    width: 100%; max-width: 360px; border-radius: 10px;
+    border: 1px solid var(--card-border); display: block; margin-bottom: 6px;
+  }
+  #photo-download { color: #9ecbff; font-size: 13px; }
+
+  /* ASR / TTS 面板 */
+  #asr-status { margin-left: 10px; }
+  #asr-result, #asr-command {
+    margin-top: 10px; font-size: 14px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--card-border);
+    border-radius: 8px; padding: 8px 12px; min-height: 22px;
+  }
+  #asr-command.flash {
+    border-color: var(--ok);
+    box-shadow: 0 0 12px rgba(82,196,26,.5);
+    color: var(--ok); font-weight: 700;
+  }
+  .mm-hint { margin-top: 10px; line-height: 1.9; }
+  #auto-speak { transform: scale(1.2); margin-right: 6px; vertical-align: middle; }
+  #tts-log { margin-top: 10px; }
+
+  /* 选中断面卡片 */
+  .card.selected {
+    border: 2px solid #1890ff;
+    box-shadow: 0 0 18px rgba(24,144,255,.55);
+  }
+  .card { cursor: pointer; }
+
+  /* Toast */
+  .toast {
+    position: fixed; left: 50%; bottom: 40px;
+    transform: translateX(-50%);
+    z-index: 200;
+    background: rgba(20,40,70,.96);
+    border: 1px solid var(--card-border);
+    color: #fff; padding: 12px 24px; border-radius: 999px; font-size: 14px;
+    opacity: 0; pointer-events: none; transition: opacity .25s; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+  <header class="topbar">
+    <h1>🎛 TideWatch 多模态交互（Camera / ASR / TTS）</h1>
+    <div class="top-right">
+      <span class="conn">
+        <span id="conn-dot" class="conn-dot connecting"></span>
+        <span id="conn-text">连接中…</span>
+      </span>
+    </div>
+  </header>
+
+  <div id="disconnect-banner" class="banner hidden">⚠ MQTT 连接已断开，正在自动重连 …</div>
+
+  <main class="grid">
+    <article class="card" id="card-reach-a">
+      <div class="card-head">
+        <div><span class="reach-id">reach-a</span><span class="reach-pos">上游</span></div>
+        <div class="online"><span class="dot off"></span><span class="online-text">等待数据</span></div>
+      </div>
+      <div class="hero"><span class="hero-value" data-field="waterLevel">—</span><span class="hero-unit">米 · 水位</span></div>
+      <div class="metrics">
+        <div class="metric"><span class="m-label">浊度 (NTU)</span><span class="m-value" data-field="turbidity">—</span></div>
+        <div class="metric"><span class="m-label">水流等级</span><span class="m-value" data-field="flowLevel">—</span></div>
+      </div>
+      <div class="card-foot">
+        <span class="badge" data-field="status">暂无数据</span>
+        <span class="time" data-field="time">—</span>
+      </div>
+    </article>
+
+    <article class="card" id="card-reach-b">
+      <div class="card-head">
+        <div><span class="reach-id">reach-b</span><span class="reach-pos">中游</span></div>
+        <div class="online"><span class="dot off"></span><span class="online-text">等待数据</span></div>
+      </div>
+      <div class="hero"><span class="hero-value" data-field="waterLevel">—</span><span class="hero-unit">米 · 水位</span></div>
+      <div class="metrics">
+        <div class="metric"><span class="m-label">浊度 (NTU)</span><span class="m-value" data-field="turbidity">—</span></div>
+        <div class="metric"><span class="m-label">水流等级</span><span class="m-value" data-field="flowLevel">—</span></div>
+      </div>
+      <div class="card-foot">
+        <span class="badge" data-field="status">暂无数据</span>
+        <span class="time" data-field="time">—</span>
+      </div>
+    </article>
+
+    <article class="card" id="card-reach-c">
+      <div class="card-head">
+        <div><span class="reach-id">reach-c</span><span class="reach-pos">下游</span></div>
+        <div class="online"><span class="dot off"></span><span class="online-text">等待数据</span></div>
+      </div>
+      <div class="hero"><span class="hero-value" data-field="waterLevel">—</span><span class="hero-unit">米 · 水位</span></div>
+      <div class="metrics">
+        <div class="metric"><span class="m-label">浊度 (NTU)</span><span class="m-value" data-field="turbidity">—</span></div>
+        <div class="metric"><span class="m-label">水流等级</span><span class="m-value" data-field="flowLevel">—</span></div>
+      </div>
+      <div class="card-foot">
+        <span class="badge" data-field="status">暂无数据</span>
+        <span class="time" data-field="time">—</span>
+      </div>
+    </article>
+  </main>
+
+  <section class="mm-section">
+
+    <div class="mm-panel">
+      <h3>📷 现场摄像头（画面叠加优先关注信息）</h3>
+      <div class="cam-wrap">
+        <video id="camera" autoplay playsinline muted></video>
+        <canvas id="overlay" width="640" height="360"></canvas>
+        <div id="cam-placeholder">点击"启动摄像头"授权后显示现场画面</div>
+      </div>
+      <div class="cam-tools">
+        <button class="mm-btn" id="cam-btn">启动摄像头</button>
+        <button class="mm-btn danger" id="photo-btn">📸 拍照记录</button>
+        <span id="cam-status" class="meta">摄像头未启动</span>
+      </div>
+      <div id="photo-box" class="hidden">
+        <img id="photo-img" alt="现场照片">
+        <div class="meta" id="photo-meta">—</div>
+        <a id="photo-download" download="tidewatch_photo.png">⬇ 下载照片</a>
+      </div>
+    </div>
+
+    <div>
+      <div class="mm-panel">
+        <h3>🎤 语音识别（Web Speech API）</h3>
+        <button class="mm-btn" id="asr-btn">开始监听</button>
+        <span id="asr-status" class="meta"></span>
+        <div id="asr-result">识别结果：—</div>
+        <div id="asr-command">指令：—</div>
+        <div class="meta mm-hint">
+          可用指令：<b>"查看上游 / 查看中游 / 查看下游"</b>（切换选中断面）·
+          <b>"播报状态"</b> · <b>"开始处理"</b> · <b>"验证恢复"</b> · <b>"关闭事件"</b>
+        </div>
+      </div>
+
+      <div class="mm-panel">
+        <h3>🔊 语音播报（TTS）</h3>
+        <label class="meta"><input type="checkbox" id="auto-speak" checked> 自动播报洪水预警</label>
+        <div style="margin-top:10px">
+          <button class="mm-btn ok" id="speak-btn">播报当前状态</button>
+        </div>
+        <div id="tts-log" class="meta">最近播报：—</div>
+      </div>
+    </div>
+
+  </section>
+
+  <footer class="footer">
+    语音指令经 MQTT <code>tidewatch/events/{reachId}</code> 发布，由 event_manager 状态机校验后多端同步<br>
+    摄像头与语音均为浏览器原生 API（getUserMedia / SpeechRecognition / speechSynthesis），无第三方库<br>
+    flowLevel 当前来源：simulated（水文节点模拟数据，来源如实标注；现场人工核实记为 review）· TideWatch 多模态入口（E2）
+  </footer>
+
+  <div id="toast" class="toast">已发送</div>
+
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script src="js/rules.js"></script>
+  <script src="js/mqtt_client.js"></script>
+  <script src="js/multimodal.js"></script>
+</body>
+</html>
