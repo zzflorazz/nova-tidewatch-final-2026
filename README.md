@@ -103,7 +103,12 @@ nova-tidewatch-final-2026/
 ```
 
 ## 快速启动（边缘实时链）
-> 若本机已有 mosquitto 服务在运行（`brew services list` 查看），可跳过第 1 步直接复用。
+> **推荐一键启动**（后台运行全部组件，日志在 `/tmp/tidewatch/`）：
+> ```bash
+> cd ~/nova-tidewatch-final-2026
+> bash scripts/start_all.sh    # 一键启动；停止：bash scripts/stop_all.sh
+> ```
+> 以下手动步骤均需在**仓库根目录**执行；若本机已有 mosquitto 服务在运行（`brew services list` 查看），可跳过第 1 步直接复用。
 
 1. 启动 MQTT Broker：`bash scripts/start_broker.sh`（TCP:1883 + WebSocket:8083）
 2. 启动共享状态服务：`python3 python/shared_state.py`（HTTP API 端口 8000）

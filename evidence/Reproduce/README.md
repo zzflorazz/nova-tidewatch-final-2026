@@ -8,6 +8,9 @@
 
 ## 前置：启动全链路
 
+> 推荐一键启动（任意目录均可）：`bash scripts/start_all.sh`（停止：`bash scripts/stop_all.sh`）。
+> 手动方式如下 —— **所有命令需在仓库根目录执行：`cd ~/nova-tidewatch-final-2026`**。
+
 打开 4 个终端，依次执行：
 
 ```bash
