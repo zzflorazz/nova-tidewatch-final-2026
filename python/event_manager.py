@@ -177,23 +177,28 @@ def handle_data_message(payload):
                                    note=f"自动检测到异常（{status}）")
                 _broadcast(ev, "open", "system")
             else:
-                # 更新活动事件的最新数据
+                # 更新活动事件的最新数据；仅当状态发生变化时才广播（避免每条数据都触发全端刷新）
+                prev_status = ev.get("status")
                 ev.update({"waterLevel": wl, "turbidity": tb,
                            "flowLevel": msg.get("flowLevel"), "status": status,
                            "data_time": data_time})
                 ev["_last_data_epoch"] = time_mod.time()
-                print(f"[event-manager] ↻ {reach_id} 事件 {ev['eventId']} 数据更新 "
-                      f"（{status}，水位={wl}）")
-                _broadcast(ev, ev["state"].lower(), "system")
+                if status != prev_status:
+                    print(f"[event-manager] ↻ {reach_id} 事件 {ev['eventId']} 状态变化 "
+                          f"{prev_status} → {status}（水位={wl}），广播更新")
+                    _broadcast(ev, ev["state"].lower(), "system")
         else:
             if ev is not None:
+                # 同上：数据照常记录（供恢复判定），仅状态变化时广播
+                prev_status = ev.get("status")
                 ev.update({"waterLevel": wl, "turbidity": tb,
                            "flowLevel": msg.get("flowLevel"), "status": status,
                            "data_time": data_time})
                 ev["_last_data_epoch"] = time_mod.time()
-                print(f"[event-manager] ↻ {reach_id} 数据恢复正常（事件 {ev['eventId']} "
-                      f"保持 {ev['state']}，等待人工验证恢复）")
-                _broadcast(ev, ev["state"].lower(), "system")
+                if status != prev_status:
+                    print(f"[event-manager] ↻ {reach_id} 数据恢复正常（事件 {ev['eventId']} "
+                          f"保持 {ev['state']}，等待人工验证恢复），广播更新")
+                    _broadcast(ev, ev["state"].lower(), "system")
 
 
 # ===================== 事件指令 =====================
