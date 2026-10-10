@@ -1,0 +1,17 @@
+# 故障2：水文节点停止发布（reach-b 离线）
+时间: 2026-10-10 11:20:30
+
+[前置] reach-b 在线: age=0.2s online=True
+[注入动作] kill reach-b 水文节点进程
+[现象] age_seconds 变化过程:
+  t+ 2s  age=  2.3s  online=True
+  t+ 4s  age=  4.3s  online=True
+  t+ 6s  age=  6.3s  online=True
+  t+ 8s  age=  8.3s  online=True
+  t+10s  age= 10.3s  online=False
+  t+12s  age= 12.3s  online=False
+  t+14s  age= 14.3s  online=False
+[现象] >10 秒后标记离线: ✓
+
+[修复动作] 重新启动节点: python3 python/mqtt_node.py --reach reach-b --interval 2
+[验证恢复] 节点重启后重新上线: age=0.5s online=true ✓

@@ -1,0 +1,14 @@
+# 故障3：非法 JSON（缺字段 / 非 JSON）
+时间: 2026-10-10 11:20:44
+
+[前置] reach-a 当前状态: {"reachId": "reach-a", "waterLevel": 5.5, "turbidity": 30, "flowLevel": 1, "status": "正常", "time": "2026-10-10 11:20:29", "last_seen": "2026-10-10 11:20:29"}
+[注入动作1] 发布缺字段消息: {"reachId": "reach-a", "waterLevel": 4.5, "status": "正常"}
+[注入动作2] 发布非 JSON 消息: this is not json
+[现象] shared_state 拒绝日志 ≥2 条: ✓
+  [shared-state] ✗ 拒绝消息（字段校验失败）: 缺少字段 turbidity; 缺少字段 flowLevel; 缺少字段 time | 原始内容: '{"reachId": "reach-a", "waterLevel": 4.5, "status": "正常"}'
+  [shared-state] ✗ 拒绝消息（JSON 解析失败）: Expecting value: line 1 column 1 (char 0) | 原始内容: 'this is not json'
+
+[验证] 状态未被污染（前后逐字段一致）: ✓
+  注入后状态: {"reachId": "reach-a", "waterLevel": 5.5, "turbidity": 30, "flowLevel": 1, "status": "正常", "time": "2026-10-10 11:20:29", "last_seen": "2026-10-10 11:20:29"}
+[修复动作] 发送合法消息恢复（无需重启）
+[验证恢复] 合法消息生效: {"reachId": "reach-a", "waterLevel": 6.0, "turbidity": 25, "flowLevel": 1, "status": "正常", "time": "2026-10-10 11:20:48"} → ✓

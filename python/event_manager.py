@@ -280,12 +280,16 @@ def handle_event_message(payload):
         print("[event-manager] ✗ 事件消息不是 JSON 对象，忽略")
         return
 
-    # 广播回显（带 seq 和 state）→ 记录 seq 后忽略，不作为指令
+    # 广播回显（带 seq 和 state）→ 记录 last_seq；seq 过期/重复的直接丢弃（可观测日志）
     if "seq" in msg and "state" in msg:
         eid, seq = msg.get("eventId"), msg.get("seq")
         with _lock:
-            if isinstance(seq, int) and seq > _last_seq.get(eid, 0):
-                _last_seq[eid] = seq
+            last = _last_seq.get(eid, 0)
+            if isinstance(seq, int):
+                if seq <= last:
+                    print(f"[event-manager] ↺ 丢弃重复/过期事件广播 {eid} seq={seq} <= last_seq={last}")
+                else:
+                    _last_seq[eid] = seq
         return
 
     action = msg.get("action")

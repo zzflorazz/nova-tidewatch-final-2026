@@ -91,6 +91,8 @@ nova-tidewatch-final-2026/
 2. 启动共享状态服务：`python3 python/shared_state.py`（HTTP API 端口 8000）
 3. 启动水文节点模拟器：`python3 python/mqtt_node.py --interval 5`
 4. 浏览器访问 `http://localhost:8000/api/state` 查看实时状态（健康检查 `/api/health`）
+5. 前端页面：`cd web && python3 -m http.server 8080`，然后访问
+   Web 监测台 `http://localhost:8080/index.html` ｜ 移动端 `http://localhost:8080/mobile.html` ｜ 3D 数字空间 `http://localhost:8080/3d.html` ｜ 多模态（Camera/ASR/TTS）`http://localhost:8080/multimodal.html`
 
 手动发送一条测试消息：
 ```bash
@@ -101,6 +103,12 @@ D3 事件链（事件状态机，HTTP API 端口 8001）：
 ```bash
 python3 python/event_manager.py     # 事件管理器：异常自动建单，处理干预指令
 python3 scripts/test_event_flow.py  # 端到端事件闭环测试
+```
+
+D4 故障注入与修复（5 种故障自动验证）：
+```bash
+python3 scripts/inject_fault.py --fault broker-down [--recover]   # 演示用：注入单个故障/修复
+python3 scripts/verify_fault.py                                   # 自动验证 5 种故障（约90秒）
 ```
 
 ## 回归测试

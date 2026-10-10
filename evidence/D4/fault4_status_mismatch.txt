@@ -1,0 +1,12 @@
+# 故障4：状态与数据不一致（status 写错）
+时间: 2026-10-10 11:20:50
+
+[注入动作] 发布不一致消息: {"reachId": "reach-c", "waterLevel": 9.0, "turbidity": 20, "flowLevel": 2, "status": "正常", "time": "2026-10-10 11:20:50"}
+[现象] shared_state ⚠ 不一致告警（保留原始值）: ✓
+  [shared-state] ⚠ reach-c status 与判级规则不一致: 消息=正常，规则=洪水预警（保留消息值）
+[分层验证] shared_state 原始 status 保留为 "正常"（>100ms 说明: 原始值未被改写）
+[现象] Web 端二次校验告警: ✓
+  [warning] [app] reach-c status 不一致: 消息="正常"，规则="洪水预警"，以规则结果为准
+[验证] Web 卡片以规则为准显示 "洪水预警"（期望 洪水预警）: ✓
+[修复动作] 发送 status 正确的消息
+  → {"reachId": "reach-c", "waterLevel": 9.0, "turbidity": 20, "flowLevel": 2, "status": "洪水预警", "time": "2026-10-10 11:20:59"}（status 由 judge 计算，不再告警）

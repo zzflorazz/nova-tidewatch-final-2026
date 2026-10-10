@@ -1,0 +1,11 @@
+# 故障1：MQTT Broker 断开与自动重连
+时间: 2026-10-10 11:20:25
+
+[注入动作] brew services stop mosquitto
+[现象] shared_state 检测到断开: ✓
+  [shared-state] ⚠ 与 Broker 断开（rc=128），paho 将自动重连 ...
+
+[修复动作] brew services start mosquitto
+[现象] shared_state 自动重连成功: ✓
+  [shared-state] ✓ 已连接 Broker localhost:1883，订阅 tidewatch/+/data
+[验证恢复] 重跑链路（发布 reach-a 5.5 → /api/state 收到）: ✓
