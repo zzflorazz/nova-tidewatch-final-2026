@@ -8,7 +8,7 @@ import os
 
 import joblib
 
-from analyze import BASE_DIR, DATA_FILE, load_data, train_isolation_forest
+from analyze import BASE_DIR, load_data, resolve_data_path, train_isolation_forest
 
 MODEL_PATH = os.path.join(BASE_DIR, 'python', 'ml_model.joblib')
 
@@ -17,8 +17,9 @@ REGRESSION_CASES = [(4.5, 20), (7.6, 20), (9.0, 20), (4.5, 75)]
 
 
 def main():
-    print(f"读取训练数据: {os.path.relpath(DATA_FILE, BASE_DIR)}")
-    df = load_data(DATA_FILE)
+    data_path = resolve_data_path()
+    print(f"读取训练数据: {os.path.relpath(data_path, BASE_DIR)}")
+    df = load_data(data_path)
     print(f"样本数: {len(df)}（特征: waterLevel, turbidity）")
 
     model = train_isolation_forest(df, contamination=0.1, random_state=42)

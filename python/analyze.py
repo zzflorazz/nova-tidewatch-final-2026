@@ -38,9 +38,23 @@ STATUS_ORDER = ['正常', '高水位警戒', '洪水预警', '水质浑浊']
 
 # ===================== 数据读取 =====================
 
+def resolve_data_path(path=None):
+    """解析数据文件路径：显式路径 > data/history.csv > data/history_example.csv（回退）
+    回退机制保证克隆仓库后无需手工准备数据即可复现分析链。"""
+    if path:
+        return path
+    if os.path.exists(DATA_FILE):
+        return DATA_FILE
+    example = os.path.join(BASE_DIR, 'data', 'history_example.csv')
+    if os.path.exists(example):
+        print("⚠ 未找到 data/history.csv，回退使用 data/history_example.csv")
+        return example
+    return DATA_FILE  # 两者都不存在，交给 pd.read_csv 抛出清晰错误
+
+
 def load_data(path=None):
     """读取历史数据 CSV（time 解析为 datetime），按断面与时间排序"""
-    path = path or DATA_FILE
+    path = resolve_data_path(path)
     df = pd.read_csv(path, parse_dates=['time'])
     df = df.sort_values(['reachId', 'time']).reset_index(drop=True)
     return df
@@ -327,7 +341,7 @@ def build_html(df, stats, ml_df, chart_paths, data_path):
 
 def generate_report(data_path=None, report_dir=None):
     """一键：读取 CSV → 统计分析 → 出图 → ML → report.html"""
-    data_path = data_path or DATA_FILE
+    data_path = resolve_data_path(data_path)
     report_dir = report_dir or REPORT_DIR
     os.makedirs(report_dir, exist_ok=True)
 

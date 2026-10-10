@@ -57,7 +57,7 @@
 ```bash
 pip3 install pandas matplotlib scikit-learn joblib
 ```
-- 生成离线分析报告：`python3 python/generate_report.py` → 输出 `report/report.html`（含统计表格、趋势图、异常记录、ML 摘要）
+- 生成离线分析报告：`python3 python/generate_report.py` → 输出 `report/report.html`（含统计表格、趋势图、异常记录、ML 摘要）。自动读取 `data/history.csv`，不存在时回退 `data/history_example.csv`（克隆后开箱即用）
 - 训练轻量 ML 模型：`python3 python/train_ml.py` → 输出 `python/ml_model.joblib`
 
 自动化验证（可选，用于 Web 监测台回归测试）：
