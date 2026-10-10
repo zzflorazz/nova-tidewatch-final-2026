@@ -1,0 +1,237 @@
+/* TideWatch Web 监测台 —— 暗色科技风 */
+
+:root {
+  --bg: #0a1628;
+  --card: #132238;
+  --card-border: #1e3a5f;
+  --text: #e6f1ff;
+  --text-dim: #8ca6c8;
+  --ok: #52c41a;       /* 正常 / 在线 / 已连接 */
+  --warn: #faad14;     /* 高水位警戒 */
+  --danger: #f5222d;   /* 洪水预警 / 断开 */
+  --turbid: #13c2c2;   /* 水质浑浊 */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(1200px 600px at 70% -10%, #10233d 0%, var(--bg) 55%);
+  color: var(--text);
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* ===== 顶部栏 ===== */
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px 24px;
+  background: rgba(14, 29, 51, .85);
+  border-bottom: 1px solid var(--card-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(6px);
+}
+.topbar h1 { font-size: 20px; margin: 0; letter-spacing: .5px; }
+.top-right { display: flex; align-items: center; gap: 20px; font-size: 14px; color: var(--text-dim); }
+
+.conn { display: inline-flex; align-items: center; gap: 8px; }
+.conn-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 8px var(--ok);
+  transition: background .3s, box-shadow .3s;
+}
+.conn-dot.connecting { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+.conn-dot.off { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+.last-update #last-update { color: var(--text); }
+
+/* ===== 断开横幅 ===== */
+.banner {
+  background: var(--danger);
+  color: #fff;
+  text-align: center;
+  padding: 10px 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.hidden { display: none !important; }
+
+/* ===== 卡片网格 ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+@media (max-width: 1024px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { .grid { grid-template-columns: 1fr; } }
+
+/* ===== 断面卡片 ===== */
+.card {
+  --c: #6b7280; /* 状态强调色，由 app.js 按 status 设置 */
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-top: 3px solid var(--c);
+  border-radius: 14px;
+  padding: 18px 20px;
+  transition: transform .2s, box-shadow .2s, border-color .3s;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+}
+
+.card-head { display: flex; justify-content: space-between; align-items: center; }
+.reach-id { font-size: 18px; font-weight: 700; letter-spacing: .5px; }
+.reach-pos { color: var(--text-dim); font-size: 13px; margin-left: 8px; }
+
+.online { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-dim); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+.dot.off { background: #6b7280; }
+
+.hero { margin: 14px 0 10px; display: flex; align-items: baseline; gap: 8px; }
+.hero-value { font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: 1px; }
+.hero-unit { color: var(--text-dim); font-size: 13px; }
+
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(255, 255, 255, .03);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+.m-label { font-size: 12px; color: var(--text-dim); }
+.m-value { font-size: 19px; font-weight: 700; }
+
+.card-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  background: #6b7280;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .45);
+}
+.time { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+
+/* ===== 页脚 ===== */
+.footer {
+  text-align: center;
+  padding: 20px 16px 28px;
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.9;
+  border-top: 1px solid var(--card-border);
+  margin-top: 10px;
+}
+.footer code {
+  background: rgba(255, 255, 255, .06);
+  padding: 1px 6px;
+  border-radius: 5px;
+  color: #9ecbff;
+}
+
+/* ===== D2 当前优先关注面板 ===== */
+.priority-panel {
+  max-width: 1280px;
+  margin: 20px auto 0;
+  padding: 16px 24px;
+  background: linear-gradient(90deg, rgba(245, 34, 45, .15), rgba(250, 173, 20, .1));
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.priority-label { font-size: 14px; color: var(--text-dim); }
+.priority-reach { font-size: 24px; font-weight: 800; color: var(--danger); }
+.priority-reason { font-size: 14px; color: var(--text); flex: 1; min-width: 260px; }
+.priority-score { font-size: 13px; color: var(--text-dim); }
+
+/* 优先断面卡片高亮（红色脉冲） */
+.card.priority {
+  border: 2px solid var(--danger);
+  box-shadow: 0 0 20px rgba(245, 34, 45, .4);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(245, 34, 45, .3); }
+  50% { box-shadow: 0 0 24px rgba(245, 34, 45, .6); }
+}
+
+/* ===== D3 事件管理面板 ===== */
+.event-panel {
+  max-width: 1280px;
+  margin: 20px auto 0;
+  padding: 16px 24px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+}
+.event-panel h3 { margin: 0 0 12px; font-size: 16px; }
+.event-list { display: flex; flex-direction: column; gap: 12px; }
+.event-empty { color: var(--text-dim); font-size: 13px; }
+
+.event-card {
+  border: 1px solid var(--card-border);
+  border-left: 4px solid #6b7280;
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, .02);
+  transition: border-color .3s;
+}
+.event-card[data-state="OPEN"]     { border-left-color: var(--danger); }
+.event-card[data-state="HANDLING"] { border-left-color: var(--warn); }
+.event-card[data-state="RECOVERED"]{ border-left-color: var(--ok); }
+
+.event-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.event-id { font-weight: 700; font-size: 14px; letter-spacing: .3px; }
+.event-reach { color: var(--text-dim); font-size: 13px; }
+.event-badge {
+  margin-left: auto;
+  padding: 2px 12px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .45);
+  white-space: nowrap;
+}
+.event-data { margin: 8px 0 4px; font-size: 13px; color: var(--text); }
+.event-timeline { font-size: 12px; color: var(--text-dim); }
+.event-actions { margin-top: 10px; display: flex; gap: 10px; }
+
+.ev-btn {
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  transition: filter .15s, opacity .15s;
+}
+.ev-btn:hover { filter: brightness(1.15); }
+.ev-btn:disabled { opacity: .5; cursor: not-allowed; }
+.ev-btn.handle  { background: var(--danger); }
+.ev-btn.recover { background: var(--ok); }
+.ev-btn.close   { background: #6b7280; }

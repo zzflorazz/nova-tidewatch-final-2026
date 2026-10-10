@@ -49,6 +49,16 @@ const STATUS_WEIGHTS = {
   '洪水预警': 4
 };
 
+/**
+ * D2 优先关注：优先度 = 环境风险权重 × 2 + 水流等级 + 连续异常次数 × 0.5
+ * 环境维度（水位/浊度）权重最高；水流越急越该关注；连续异常越多越该关注（次要因素）
+ */
+function calcPriority(status, flowLevel, anomalyCount) {
+  const envWeight = STATUS_WEIGHTS[status] || 0;
+  const anomaly = anomalyCount || 0;
+  return envWeight * 2 + (flowLevel || 0) + anomaly * 0.5;
+}
+
 // 回归测试数据
 const TEST_CASES = [
   { waterLevel: 4.5, turbidity: 20, expected: '正常' },
@@ -71,5 +81,5 @@ function runTests() {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { judge, FLOW_LEVELS, STATUS_COLORS, STATUS_WEIGHTS, TEST_CASES, runTests };
+  module.exports = { judge, calcPriority, FLOW_LEVELS, STATUS_COLORS, STATUS_WEIGHTS, TEST_CASES, runTests };
 }

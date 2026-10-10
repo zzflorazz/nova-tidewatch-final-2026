@@ -47,6 +47,18 @@ STATUS_WEIGHTS = {
     '洪水预警': 4
 }
 
+def calc_priority(status, flow_level, anomaly_count=0):
+    """
+    D2 优先关注：优先度 = 环境风险权重 × 2 + 水流等级 + 连续异常次数 × 0.5
+    :param status: 环境状态（正常/水质浑浊/高水位警戒/洪水预警）
+    :param flow_level: 水流等级 0-3
+    :param anomaly_count: 该断面连续异常次数
+    :return: 优先度分数（越高越该优先关注）
+    """
+    env_weight = STATUS_WEIGHTS.get(status, 0)
+    return env_weight * 2 + (flow_level or 0) + (anomaly_count or 0) * 0.5
+
+
 # 回归测试数据
 TEST_CASES = [
     {'water_level': 4.5, 'turbidity': 20, 'expected': '正常'},

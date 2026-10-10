@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TideWatch 河道水位水质智能监测系统</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="js/rules.js"></script>
+<script src="js/mqtt_client.js"></script>
+<script src="js/app.js"></script>
+</head>
+<body>
+
+  <header class="topbar">
+    <h1>🌊 TideWatch 河道水位水质智能监测系统</h1>
+    <div class="top-right">
+      <span class="conn">
+        <span id="conn-dot" class="conn-dot connecting"></span>
+        <span id="conn-text">连接中…</span>
+      </span>
+      <span class="last-update">最后更新：<span id="last-update">—</span></span>
+    </div>
+  </header>
+
+  <div id="disconnect-banner" class="banner hidden">⚠ MQTT 连接已断开，正在自动重连 …</div>
+
+  <section class="priority-panel">
+    <div class="priority-label">🎯 当前优先关注</div>
+    <div class="priority-reach" id="priority-reach">—</div>
+    <div class="priority-reason" id="priority-reason">等待数据…</div>
+    <div class="priority-score">优先度：<span id="priority-score">—</span></div>
+  </section>
+
+  <section class="event-panel">
+    <h3>📋 事件管理</h3>
+    <div class="event-list" id="event-list">
+      <div class="event-empty">暂无事件</div>
+    </div>
+  </section>
+
+  <main class="grid">
+
+    <article class="card" id="card-reach-a">
+      <div class="card-head">
+        <div><span class="reach-id">reach-a</span><span class="reach-pos">上游</span></div>
+        <div class="online"><span class="dot off"></span><span class="online-text">等待数据</span></div>
+      </div>
+      <div class="hero">
+        <span class="hero-value" data-field="waterLevel">—</span>
+        <span class="hero-unit">米 · 水位</span>
+      </div>
+      <div class="metrics">
+        <div class="metric"><span class="m-label">浊度 (NTU)</span><span class="m-value" data-field="turbidity">—</span></div>
+        <div class="metric"><span class="m-label">水流等级</span><span class="m-value" data-field="flowLevel">—</span></div>
+      </div>
+      <div class="card-foot">
+        <span class="badge" data-field="status">暂无数据</span>
+        <span class="time" data-field="time">—</span>
+      </div>
+    </article>
+
+    <article class="card" id="card-reach-b">
+      <div class="card-head">
+        <div><span class="reach-id">reach-b</span><span class="reach-pos">中游</span></div>
+        <div class="online"><span class="dot off"></span><span class="online-text">等待数据</span></div>
+      </div>
+      <div class="hero">
+        <span class="hero-value" data-field="waterLevel">—</span>
+        <span class="hero-unit">米 · 水位</span>
+      </div>
+      <div class="metrics">
+        <div class="metric"><span class="m-label">浊度 (NTU)</span><span class="m-value" data-field="turbidity">—</span></div>
+        <div class="metric"><span class="m-label">水流等级</span><span class="m-value" data-field="flowLevel">—</span></div>
+      </div>
+      <div class="card-foot">
+        <span class="badge" data-field="status">暂无数据</span>
+        <span class="time" data-field="time">—</span>
+      </div>
+    </article>
+
+    <article class="card" id="card-reach-c">
+      <div class="card-head">
+        <div><span class="reach-id">reach-c</span><span class="reach-pos">下游</span></div>
+        <div class="online"><span class="dot off"></span><span class="online-text">等待数据</span></div>
+      </div>
+      <div class="hero">
+        <span class="hero-value" data-field="waterLevel">—</span>
+        <span class="hero-unit">米 · 水位</span>
+      </div>
+      <div class="metrics">
+        <div class="metric"><span class="m-label">浊度 (NTU)</span><span class="m-value" data-field="turbidity">—</span></div>
+        <div class="metric"><span class="m-label">水流等级</span><span class="m-value" data-field="flowLevel">—</span></div>
+      </div>
+      <div class="card-foot">
+        <span class="badge" data-field="status">暂无数据</span>
+        <span class="time" data-field="time">—</span>
+      </div>
+    </article>
+
+  </main>
+
+  <footer class="footer">
+    数据源：MQTT <code>tidewatch/+/data</code>（实时）｜ 初始快照：<code>http://localhost:8000/api/state</code><br>
+    统一判级规则：waterLevel ≥ 8.5 洪水预警 ｜ ≥ 7.0 高水位警戒 ｜ turbidity ≥ 60 水质浑浊 ｜ 其余 正常<br>
+    TideWatch 综合工程作品 · Web 监测台（D1）· 所有更新由 MQTT 消息驱动
+  </footer>
+
+</body>
+</html>
