@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TideWatch 移动端</title>
+<link rel="stylesheet" href="css/mobile.css">
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="js/rules.js"></script>
+<script src="js/mqtt_client.js"></script>
+<script src="js/mobile.js"></script>
+</head>
+<body>
+
+  <div id="disconnect-banner" class="banner hidden">⚠ MQTT 连接已断开，正在重连 …</div>
+
+  <div class="wrap">
+
+    <header class="m-header">
+      <h1>🌊 TideWatch 移动端</h1>
+      <span class="conn">
+        <span id="conn-dot" class="conn-dot connecting"></span>
+        <span id="conn-text">连接中…</span>
+      </span>
+    </header>
+
+    <section class="m-priority">
+      <div class="m-priority-label">🎯 当前优先关注</div>
+      <div class="m-priority-reach" id="priority-reach">—</div>
+      <div class="m-priority-reason" id="priority-reason">等待数据…</div>
+      <div class="m-priority-score">优先度：<span id="priority-score">—</span></div>
+    </section>
+
+    <main class="m-reaches">
+
+      <article class="m-card" id="card-reach-a">
+        <div class="m-card-head">
+          <span class="reach-id">reach-a</span><span class="reach-pos">上游</span>
+          <span class="online"><span class="dot off"></span><span class="online-text">等待数据</span></span>
+        </div>
+        <div class="m-card-values">
+          <div class="v"><span class="v-label">水位 (米)</span><span class="v-value" data-field="waterLevel">—</span></div>
+          <div class="v"><span class="v-label">浊度 (NTU)</span><span class="v-value" data-field="turbidity">—</span></div>
+          <div class="v v-flow"><span class="v-label">水流</span><span class="v-value" data-field="flowLevel">—</span></div>
+        </div>
+        <div class="m-card-foot">
+          <span class="badge" data-field="status">暂无数据</span>
+          <span class="time" data-field="time">—</span>
+        </div>
+      </article>
+
+      <article class="m-card" id="card-reach-b">
+        <div class="m-card-head">
+          <span class="reach-id">reach-b</span><span class="reach-pos">中游</span>
+          <span class="online"><span class="dot off"></span><span class="online-text">等待数据</span></span>
+        </div>
+        <div class="m-card-values">
+          <div class="v"><span class="v-label">水位 (米)</span><span class="v-value" data-field="waterLevel">—</span></div>
+          <div class="v"><span class="v-label">浊度 (NTU)</span><span class="v-value" data-field="turbidity">—</span></div>
+          <div class="v v-flow"><span class="v-label">水流</span><span class="v-value" data-field="flowLevel">—</span></div>
+        </div>
+        <div class="m-card-foot">
+          <span class="badge" data-field="status">暂无数据</span>
+          <span class="time" data-field="time">—</span>
+        </div>
+      </article>
+
+      <article class="m-card" id="card-reach-c">
+        <div class="m-card-head">
+          <span class="reach-id">reach-c</span><span class="reach-pos">下游</span>
+          <span class="online"><span class="dot off"></span><span class="online-text">等待数据</span></span>
+        </div>
+        <div class="m-card-values">
+          <div class="v"><span class="v-label">水位 (米)</span><span class="v-value" data-field="waterLevel">—</span></div>
+          <div class="v"><span class="v-label">浊度 (NTU)</span><span class="v-value" data-field="turbidity">—</span></div>
+          <div class="v v-flow"><span class="v-label">水流</span><span class="v-value" data-field="flowLevel">—</span></div>
+        </div>
+        <div class="m-card-foot">
+          <span class="badge" data-field="status">暂无数据</span>
+          <span class="time" data-field="time">—</span>
+        </div>
+      </article>
+
+    </main>
+
+    <section class="m-events">
+      <h2>📋 事件操作</h2>
+      <div id="event-list">
+        <div class="event-empty">当前无待处理事件</div>
+      </div>
+    </section>
+
+    <footer class="m-footer">
+      数据源：MQTT <code>tidewatch/+/data</code> 与 <code>tidewatch/events/+</code><br>
+      事件操作经 event_manager 状态机校验后多端同步 · TideWatch 移动端（E3）
+    </footer>
+
+  </div>
+
+  <div id="toast" class="toast">指令已发送</div>
+
+</body>
+</html>

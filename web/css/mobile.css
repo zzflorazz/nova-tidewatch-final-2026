@@ -1,0 +1,221 @@
+/* TideWatch 移动端 H5 —— 单列大按钮触屏布局（≤480px 居中） */
+
+:root {
+  --bg: #0a1628;
+  --card: #132238;
+  --card-border: #1e3a5f;
+  --text: #e6f1ff;
+  --text-dim: #8ca6c8;
+  --ok: #52c41a;
+  --warn: #faad14;
+  --danger: #f5222d;
+  --turbid: #13c2c2;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(600px 300px at 70% -5%, #10233d 0%, var(--bg) 60%);
+  color: var(--text);
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 480px;
+  padding: 12px 14px 32px;
+  min-height: 100vh;
+}
+
+/* ===== 断开横幅（固定顶部） ===== */
+.banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: var(--danger);
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+}
+.hidden { display: none !important; }
+
+/* ===== 顶部 ===== */
+.m-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 2px 14px;
+}
+.m-header h1 { font-size: 19px; margin: 0; }
+.conn { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-dim); }
+.conn-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+.conn-dot.connecting { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+.conn-dot.off { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+/* ===== 优先关注（精简版） ===== */
+.m-priority {
+  background: linear-gradient(90deg, rgba(245, 34, 45, .15), rgba(250, 173, 20, .1));
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.m-priority-label { font-size: 13px; color: var(--text-dim); }
+.m-priority-reach { font-size: 24px; font-weight: 800; color: var(--danger); margin: 4px 0; }
+.m-priority-reason { font-size: 13px; line-height: 1.6; }
+.m-priority-score { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+/* ===== 断面卡片（垂直排列） ===== */
+.m-card {
+  --c: #6b7280;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-top: 3px solid var(--c);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.m-card.priority {
+  border: 2px solid var(--danger);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(245, 34, 45, .3); }
+  50% { box-shadow: 0 0 22px rgba(245, 34, 45, .55); }
+}
+
+.m-card-head { display: flex; align-items: center; gap: 8px; }
+.reach-id { font-size: 18px; font-weight: 700; }
+.reach-pos { color: var(--text-dim); font-size: 13px; }
+.online { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-dim); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); }
+.dot.off { background: #6b7280; }
+
+.m-card-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+.v {
+  background: rgba(255, 255, 255, .03);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.v-label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 2px; }
+.v-value { font-size: 28px; font-weight: 800; line-height: 1.1; }
+.v-flow .v-value { font-size: 20px; }
+
+.m-card-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  background: #6b7280;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .45);
+  white-space: nowrap;
+}
+.time { font-size: 12px; color: var(--text-dim); }
+
+/* ===== 事件操作区 ===== */
+.m-events {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.m-events h2 { font-size: 16px; margin: 0 0 10px; }
+.event-empty { color: var(--text-dim); font-size: 14px; }
+
+.m-event {
+  border: 1px solid var(--card-border);
+  border-left: 4px solid #6b7280;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: rgba(255, 255, 255, .02);
+}
+.m-event[data-state="OPEN"] { border-left-color: var(--danger); }
+.m-event[data-state="HANDLING"] { border-left-color: var(--warn); }
+
+.m-event-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.event-id { font-weight: 700; font-size: 14px; }
+.event-badge {
+  margin-left: auto;
+  padding: 3px 12px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .45);
+  white-space: nowrap;
+}
+.event-data { margin: 8px 0 4px; font-size: 14px; }
+.event-timeline { font-size: 12px; color: var(--text-dim); }
+
+.m-event-actions { display: flex; gap: 10px; margin-top: 12px; }
+.ev-btn {
+  flex: 1;
+  min-height: 48px;                /* 触屏友好 */
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: transform .1s, filter .1s;
+}
+.ev-btn:active { filter: brightness(.85); transform: scale(.98); }
+.ev-btn:disabled { opacity: .5; }
+.ev-btn.handle  { background: var(--danger); }
+.ev-btn.recover { background: var(--ok); }
+.ev-btn.close   { background: #6b7280; }
+
+/* ===== 页脚 ===== */
+.m-footer {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.9;
+  padding: 6px 4px 10px;
+}
+.m-footer code {
+  background: rgba(255, 255, 255, .06);
+  padding: 1px 6px;
+  border-radius: 5px;
+  color: #9ecbff;
+}
+
+/* ===== Toast（底部弹出，2 秒消失） ===== */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 44px;
+  transform: translateX(-50%);
+  z-index: 200;
+  background: rgba(20, 40, 70, .96);
+  border: 1px solid var(--card-border);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-size: 15px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; }
