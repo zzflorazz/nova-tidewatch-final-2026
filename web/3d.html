@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TideWatch 3D 数字空间</title>
+<style>
+  :root {
+    --bg: #0a1628;
+    --card: #132238;
+    --card-border: #1e3a5f;
+    --text: #e6f1ff;
+    --text-dim: #8ca6c8;
+    --ok: #52c41a;
+    --warn: #faad14;
+    --danger: #f5222d;
+    --turbid: #13c2c2;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; color: var(--text); }
+  #container { position: fixed; inset: 0; }
+  #container canvas { display: block; }
+
+  /* 左上标题 */
+  #title {
+    position: fixed; top: 16px; left: 18px; z-index: 10;
+    font-size: 20px; font-weight: 800; letter-spacing: .5px;
+    text-shadow: 0 2px 8px rgba(0,0,0,.6);
+  }
+  #title .hint { display: block; font-size: 12px; color: var(--text-dim); font-weight: 400; margin-top: 4px; }
+
+  /* 连接状态 */
+  #conn-chip {
+    position: fixed; top: 18px; right: 18px; z-index: 11;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(19, 34, 56, .85); border: 1px solid var(--card-border);
+    border-radius: 999px; padding: 6px 14px; font-size: 13px; color: var(--text-dim);
+  }
+  .conn-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+  .conn-dot.connecting { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+  .conn-dot.off { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+  .banner {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--danger); color: #fff; text-align: center;
+    padding: 9px; font-weight: 700;
+  }
+  .hidden { display: none !important; }
+
+  /* 右上状态面板 */
+  #panel {
+    position: fixed; top: 64px; right: 18px; width: 268px; z-index: 10;
+    background: rgba(19, 34, 56, .92); border: 1px solid var(--card-border);
+    border-radius: 14px; padding: 14px 16px; font-size: 13px;
+    backdrop-filter: blur(6px);
+  }
+  #panel h3 { margin: 0 0 10px; font-size: 15px; }
+  #panel .row { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px dashed rgba(30,58,95,.7); }
+  #panel .row:last-of-type { border-bottom: none; }
+  #panel .k { color: var(--text-dim); }
+  .panel-priority {
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--card-border);
+    color: var(--text-dim); font-size: 12px;
+  }
+  .panel-priority #panel-priority { color: var(--danger); font-weight: 700; }
+  #panel-placeholder { color: var(--text-dim); padding: 6px 0; }
+  .chip {
+    display: inline-block; padding: 2px 10px; border-radius: 999px;
+    color: #fff; font-size: 12px; font-weight: 700; text-shadow: 0 1px 2px rgba(0,0,0,.45);
+  }
+
+  /* 左下角图例 */
+  #legend {
+    position: fixed; left: 18px; bottom: 16px; z-index: 10;
+    background: rgba(19, 34, 56, .85); border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 10px 14px; font-size: 12px; color: var(--text-dim);
+    line-height: 2;
+  }
+  #legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+
+  /* 悬停 tooltip */
+  #tooltip {
+    position: fixed; z-index: 50; pointer-events: none;
+    background: rgba(10, 22, 40, .95); border: 1px solid var(--card-border);
+    border-radius: 8px; padding: 8px 12px; font-size: 12px; line-height: 1.7;
+    max-width: 240px;
+  }
+</style>
+</head>
+<body>
+
+  <div id="container"></div>
+
+  <div id="title">
+    🌊 TideWatch 3D 数字空间
+    <span class="hint">拖拽旋转 · 滚轮缩放 · 点击断面标记查看详情</span>
+  </div>
+
+  <div id="conn-chip">
+    <span id="conn-dot" class="conn-dot connecting"></span>
+    <span id="conn-text">连接中…</span>
+  </div>
+
+  <div id="disconnect-banner" class="banner hidden">⚠ MQTT 连接已断开，正在自动重连 …</div>
+
+  <div id="panel">
+    <h3>断面详情</h3>
+    <div id="panel-placeholder">点击断面标记查看详情</div>
+    <div id="panel-body" class="hidden">
+      <div class="row"><span class="k">断面</span><span id="p-reach">—</span></div>
+      <div class="row"><span class="k">水位</span><span id="p-water">—</span></div>
+      <div class="row"><span class="k">浊度</span><span id="p-turbidity">—</span></div>
+      <div class="row"><span class="k">水流</span><span id="p-flow">—</span></div>
+      <div class="row"><span class="k">状态</span><span id="p-status">—</span></div>
+      <div class="row"><span class="k">更新时间</span><span id="p-time">—</span></div>
+      <div class="row"><span class="k">事件</span><span id="p-event">无</span></div>
+    </div>
+    <div class="panel-priority">🎯 当前优先关注：<span id="panel-priority">—</span></div>
+  </div>
+
+  <div id="legend">
+    <div><span class="sw" style="background:#1890ff"></span>正常（水面蓝）</div>
+    <div><span class="sw" style="background:#faad14"></span>高水位警戒</div>
+    <div><span class="sw" style="background:#f5222d"></span>洪水预警（闪烁+波动）</div>
+    <div><span class="sw" style="background:#13c2c2"></span>水质浑浊</div>
+    <div style="margin-top:4px">优先关注 = 红色脉冲光圈 ｜ 水流箭头越快 = flowLevel 越高</div>
+  </div>
+
+  <div id="tooltip" class="hidden"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script src="js/rules.js"></script>
+  <script src="js/mqtt_client.js"></script>
+  <script src="js/scene3d.js"></script>
+</body>
+</html>
