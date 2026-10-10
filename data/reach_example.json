@@ -1,0 +1,5 @@
+{
+  "reach-a": {"reachId":"reach-a","waterLevel":4.5,"turbidity":20,"flowLevel":0,"status":"正常","time":"2026-10-09 00:00:00"},
+  "reach-b": {"reachId":"reach-b","waterLevel":4.5,"turbidity":20,"flowLevel":1,"status":"正常","time":"2026-10-09 00:00:00"},
+  "reach-c": {"reachId":"reach-c","waterLevel":4.5,"turbidity":20,"flowLevel":0,"status":"正常","time":"2026-10-09 00:00:00"}
+}

@@ -1,0 +1,22 @@
+===== 组1：全部正常 =====
+  reach-a: status=正常, flowLevel=0(缓流), 优先度=0.0  ← 当前优先关注
+  reach-b: status=正常, flowLevel=0(缓流), 优先度=0.0
+  reach-c: status=正常, flowLevel=0(缓流), 优先度=0.0
+  → 优先断面: reach-a（预期 reach-a（同分取第一个））
+    理由: 环境:正常(0) = 0.0
+
+===== 组2：reach-c 洪水预警 + 湍急 =====
+  reach-a: status=正常, flowLevel=0(缓流), 优先度=0.0
+  reach-b: status=水质浑浊, flowLevel=1(平稳), 优先度=5.0
+  reach-c: status=洪水预警, flowLevel=2(湍急), 优先度=10.0  ← 当前优先关注
+  → 优先断面: reach-c（预期 reach-c（洪水预警8 + 湍急2 = 10））
+    理由: 环境:洪水预警(8) + 水流:湍急(2) = 10.0
+
+===== 组3：reach-b 洪水预警 + 湍流 =====
+  reach-a: status=高水位警戒, flowLevel=0(缓流), 优先度=6.0
+  reach-b: status=洪水预警, flowLevel=3(湍流), 优先度=11.0  ← 当前优先关注
+  reach-c: status=水质浑浊, flowLevel=1(平稳), 优先度=5.0
+  → 优先断面: reach-b（预期 reach-b（洪水预警8 + 湍流3 = 11））
+    理由: 环境:洪水预警(8) + 水流:湍流(3) = 11.0
+
+3 组优先断面: reach-a → reach-c → reach-b，随数据变化 ✓
