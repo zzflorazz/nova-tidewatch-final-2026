@@ -96,7 +96,7 @@ nova-tidewatch-final-2026/
 │   └── ml_model.joblib   # 已训练的 IsolationForest
 ├── data/                 # 示例数据（history_example.csv / reach_example.json）
 ├── report/               # 生成的分析报告（report.html / compare_rule_ml.html / 图表）
-├── docs/                 # 技术文档 / 演示视频脚本 / 答辩 PPT 审校建议
+├── docs/                 # 技术文档（Word 版）
 ├── evidence/             # 证据目录（Challenge / D1–D5 / E1–E3 / Debug / Reproduce / Open）
 ├── scripts/              # 演示与自动化验证脚本（send_* / test_* / verify_* / inject_*）
 └── README.md
