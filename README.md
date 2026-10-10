@@ -6,7 +6,7 @@
 
 ## 核心能力
 - **2 条数据链**：离线分析链（CSV → Python → report.html）+ 边缘实时链（MQTT → 多端同步）
-- **多端协同**：Web 监测台 + 微信小程序 + 3D 数字空间，共享同一套实时状态
+- **多端协同**：Web 监测台 + 移动端 H5 + 3D 数字空间，共享同一套实时状态
 - **事件闭环**：发现 → 优先关注 → 干预 → 验证 → 恢复/未恢复 → 记录复盘
 - **规则 + ML 对照**：固定阈值规则与 IsolationForest 并列判断，组合裁决
 
@@ -42,7 +42,7 @@
 - Node.js ≥ 18
 - Python ≥ 3.9
 - mosquitto（MQTT Broker）
-- 微信开发者工具
+- 现代浏览器（Chrome / Edge 最佳；摄像头与语音功能需要浏览器授权）
 
 ## MQTT 约定
 - Broker TCP: localhost:1883
@@ -79,18 +79,26 @@ python3 scripts/verify_web.py   # 验证不串线/断线横幅/自动重连，�
 ## 目录结构
 ```
 nova-tidewatch-final-2026/
-├── web/              # Web 监测台
-│   ├── js/rules.js   # 统一判级规则（JS）
-│   └── ...
-├── python/           # Python 数据分析
-│   ├── rules.py      # 统一判级规则（Python）
-│   └── ...
-├── miniapp/          # 微信小程序
-├── dashboard/        # 实时 Dashboard + 3D
-├── data/             # CSV/JSON 数据
-├── report/           # report.html + 趋势图
-├── evidence/         # 证据截图
-├── scripts/          # 演示脚本
+├── web/                  # 前端页面（全部为纯静态页，mqtt.js 走 CDN，无构建步骤）
+│   ├── index.html        # Web 监测台（D1 / D2 / D3 事件面板）
+│   ├── mobile.html       # 移动端 H5（E3 跨端同步，浏览器 F12 切移动视图）
+│   ├── 3d.html           # 3D 数字空间（E1，Three.js r128 CDN）
+│   ├── multimodal.html   # 摄像头 / 语音交互（E2，浏览器原生 API）
+│   ├── compare.html      # 规则 / ML 对照页（D5）
+│   ├── js/rules.js       # 统一判级规则（JS 版，与 python 版一致）
+│   └── js/mqtt_client.js # TideWatchMQTT：多 topic 订阅 / 发布 / 自动重连
+├── python/               # Python 后端与分析
+│   ├── rules.py          # 统一判级规则（Python 版）
+│   ├── shared_state.py   # 共享实时状态服务（HTTP :8000）
+│   ├── event_manager.py  # 事件状态机（HTTP :8001）
+│   ├── mqtt_node.py      # 水文节点模拟器（3 断面）
+│   ├── analyze.py / generate_report.py / train_ml.py / compare_rule_ml.py
+│   └── ml_model.joblib   # 已训练的 IsolationForest
+├── data/                 # 示例数据（history_example.csv / reach_example.json）
+├── report/               # 生成的分析报告（report.html / compare_rule_ml.html / 图表）
+├── docs/                 # 技术文档 / 演示视频脚本 / 答辩 PPT 审校建议
+├── evidence/             # 证据目录（Challenge / D1–D5 / E1–E3 / Debug / Reproduce / Open）
+├── scripts/              # 演示与自动化验证脚本（send_* / test_* / verify_* / inject_*）
 └── README.md
 ```
 
