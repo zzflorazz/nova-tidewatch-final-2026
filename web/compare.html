@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TideWatch 规则 vs ML 对照</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px 32px; }
+  .intro { line-height: 1.9; font-size: 14px; }
+  .intro b { color: #9ecbff; }
+  .case-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+    margin: 20px 0;
+  }
+  @media (max-width: 900px) { .case-grid { grid-template-columns: 1fr; } }
+  .case-card {
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 14px; padding: 18px 20px;
+  }
+  .case-card.consistent { border-top: 3px solid var(--ok); }
+  .case-card.mismatch { border-top: 3px solid var(--warn); }
+  .case-input { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+  .case-row { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0;
+              border-bottom: 1px dashed rgba(30,58,95,.7); font-size: 14px; }
+  .case-row .k { color: var(--text-dim); }
+  .verdict { display: inline-block; margin-top: 12px; padding: 4px 14px; border-radius: 999px;
+             font-size: 13px; font-weight: 700; color: #fff; }
+  .verdict.ok { background: var(--ok); }
+  .verdict.warn { background: var(--warn); color: #3a2a00; }
+  .case-note { margin-top: 10px; font-size: 12.5px; color: var(--text-dim); line-height: 1.8; }
+  .strat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 16px 0; }
+  @media (max-width: 900px) { .strat-grid { grid-template-columns: 1fr; } }
+  .strat {
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 16px 18px; font-size: 13px; line-height: 1.8;
+  }
+  .strat h4 { margin: 0 0 8px; font-size: 15px; }
+  .strat.reco { border: 2px solid #2563eb; box-shadow: 0 0 16px rgba(37,99,235,.35); }
+  .reco-tag { background: #2563eb; color: #fff; border-radius: 999px;
+              padding: 2px 10px; font-size: 12px; margin-left: 8px; }
+  .ml-anom { color: var(--danger); font-weight: 700; }
+  .ml-normal { color: #8ca6c8; }
+  code { background: rgba(255,255,255,.06); padding: 1px 6px; border-radius: 5px; color: #9ecbff; }
+</style>
+</head>
+<body>
+
+  <header class="topbar">
+    <h1>⚖ TideWatch 规则 vs ML 对照（D5）</h1>
+    <div class="top-right">
+      <span class="meta" style="color:var(--text-dim);font-size:13px">
+        <a href="index.html" style="color:#9ecbff">监测台</a> ·
+        <a href="mobile.html" style="color:#9ecbff">移动端</a> ·
+        <a href="3d.html" style="color:#9ecbff">3D</a> ·
+        <a href="multimodal.html" style="color:#9ecbff">多模态</a>
+      </span>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <section class="card intro" style="margin-top:20px">
+      <h2 style="margin-top:0">规则阈值 vs ML 历史分布</h2>
+      <p>
+        <b>固定规则（judge）</b>回答"是否越界"：按 waterLevel ≥ 8.5 / ≥ 7.0 / turbidity ≥ 60 的阈值顺序判级，口径确定、可解释。<br>
+        <b>ML（IsolationForest）</b>回答"是否偏离历史分布"：以历史 waterLevel / turbidity 的分布为参照，标记分布异常点。<br>
+        两者关注<b>不同问题</b>，结论不一致是正常现象 —— 不一致本身就是值得分析的信息，不代表任何一方"错误"。
+      </p>
+    </section>
+
+    <h2 style="margin: 24px 0 0; font-size: 18px; border-left: 4px solid #2563eb; padding-left: 10px">
+      4 组回归测试数据对照
+      <span class="meta" style="color:var(--text-dim);font-size:12px;font-weight:400">
+        规则结果由 rules.js judge() 实时计算；ML 结果来自阶段1 train_ml.py 对固定模型的实际输出（写死展示，非手工编造）
+      </span>
+    </h2>
+    <div class="case-grid" id="case-grid"><!-- 动态生成 --></div>
+
+    <h2 style="margin: 24px 0 0; font-size: 18px; border-left: 4px solid #2563eb; padding-left: 10px">
+      组合裁决策略（当两者不一致时，系统听谁的）
+    </h2>
+    <div class="strat-grid">
+      <div class="strat">
+        <h4>策略A · 规则优先</h4>
+        <p><code>decision = rule_status</code></p>
+        <p>以阈值判级为准，ML 仅作参考。<br>
+        <b>优点</b>：与统一口径一致；<b>缺点</b>：完全忽略"分布可疑"信号（可能漏报从未越界但明显变异的模式）。</p>
+      </div>
+      <div class="strat">
+        <h4>策略B · ML 优先</h4>
+        <p><code>ML异常 → "需关注"；否则用规则</code></p>
+        <p>分布异常直接报警。<br>
+        <b>优点</b>：分布维度不漏；<b>缺点</b>：把"已越界但历史常见"的值降级为普通关注，弱化确定风险。</p>
+      </div>
+      <div class="strat reco">
+        <h4>策略C · 组合裁决<span class="reco-tag">推荐</span></h4>
+        <p>两者皆异常 → <b>确认报警</b>；<br>仅一方异常 → <b>人工复核</b>（保留双方依据）；<br>均正常 → 正常。</p>
+        <p><b>为什么推荐</b>：不删除任何一方的判断，两种依据始终并列可见；确认报警更可信，不一致转入复核 —— 同时减少误报和漏报。裁决参数可解释、可重复，换一组数据结果随之变化。</p>
+      </div>
+    </div>
+
+    <footer class="footer" style="margin-top:24px">
+      完整对照报告（一致率 / 交叉统计 / 不一致案例 / 决策边界散点图）：运行 <code>python3 python/compare_rule_ml.py</code> 生成 <code>report/compare_rule_ml.html</code><br>
+      TideWatch 综合工程作品 · D5 固定规则与 ML 辅助判断
+    </footer>
+  </div>
+
+  <script src="js/rules.js"></script>
+  <script>
+    // 4 组回归测试数据；ML 结果来自阶段1 train_ml.py 的实际输出（固定模型、非构造）
+    const CASES = [
+      { wl: 4.5, tb: 20, ml: '常态', score: '+0.1320',
+        note: '低水位、低浊度，历史中最常见的组合，规则与 ML 均判无需关注。' },
+      { wl: 7.6, tb: 20, ml: '常态', score: '+0.0722',
+        note: '不一致：规则判"越界"，但 reach-b 历史含大量高水位样本（警戒段），7.6 米在历史分布中常见，ML 不认为异常。' },
+      { wl: 9.0, tb: 20, ml: '常态', score: '+0.0098',
+        note: '不一致：同上——历史洪水样本（reach-b 曾达 9.8 米）使 9.0 米仍处分布内；规则只关心是否越过 8.5 阈值。' },
+      { wl: 4.5, tb: 75, ml: '异常', score: '-0.0090',
+        note: '一致：高浊度段在历史中集中且样本少，规则判"水质浑浊"、ML 同时标记偏离分布，两者相互印证。' },
+    ];
+
+    const grid = document.getElementById('case-grid');
+    CASES.forEach((c) => {
+      const result = judge(c.wl, c.tb);
+      const ruleStatus = (result && result.status) ? result.status : result;
+      const ruleAbnormal = ruleStatus !== '正常';
+      const mlAbnormal = c.ml === '异常';
+      const consistent = ruleAbnormal === mlAbnormal;
+      const color = (typeof STATUS_COLORS !== 'undefined' && STATUS_COLORS[ruleStatus]) || '#6b7280';
+
+      const div = document.createElement('div');
+      div.className = 'case-card ' + (consistent ? 'consistent' : 'mismatch');
+      div.innerHTML = `
+        <div class="case-input">输入：waterLevel = ${c.wl} 米 · turbidity = ${c.tb} NTU</div>
+        <div class="case-row"><span class="k">规则判断（judge）</span>
+          <span class="badge" style="background:${color};padding:2px 12px;border-radius:999px;color:#fff;font-weight:700;font-size:13px">${ruleStatus}</span></div>
+        <div class="case-row"><span class="k">ML 判断（IsolationForest）</span>
+          <span class="${mlAbnormal ? 'ml-anom' : 'ml-normal'}">${mlAbnormal ? '与历史分布明显不同，需关注' : '接近历史常态'}（score ${c.score}）</span></div>
+        <div class="case-row"><span class="k">是否一致</span>
+          <span>${consistent ? '一致' : '不一致（' + (ruleAbnormal ? '规则异常+ML常态' : '规则正常+ML异常') + '）'}</span></div>
+        <span class="verdict ${consistent ? 'ok' : 'warn'}">${consistent ? '✓ 一致' : '⚠ 不一致'}</span>
+        <div class="case-note">${c.note}</div>`;
+      grid.appendChild(div);
+    });
+  </script>
+</body>
+</html>

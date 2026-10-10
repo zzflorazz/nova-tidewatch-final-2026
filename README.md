@@ -53,12 +53,22 @@
 - 订阅通配符：tidewatch/+/data
 
 ## Python 依赖
-离线分析链（数据链 A）所需：pandas, matplotlib, scikit-learn, joblib
 ```bash
+# 边缘实时链（数据链 B）所需
+pip3 install paho-mqtt
+
+# 离线分析链（数据链 A）所需
 pip3 install pandas matplotlib scikit-learn joblib
+
+# 全部依赖一行安装
+pip3 install paho-mqtt pandas matplotlib scikit-learn joblib
 ```
 - 生成离线分析报告：`python3 python/generate_report.py` → 输出 `report/report.html`（含统计表格、趋势图、异常记录、ML 摘要）。自动读取 `data/history.csv`，不存在时回退 `data/history_example.csv`（克隆后开箱即用）
 - 训练轻量 ML 模型：`python3 python/train_ml.py` → 输出 `python/ml_model.joblib`
+- D5 规则/ML 对照分析：`python3 python/compare_rule_ml.py` → 输出 `report/compare_rule_ml.html`（一致率 / 交叉统计 / 不一致案例 / 决策边界散点图 / 3 种组合裁决策略统计）。
+  规则基于**阈值**（是否越界），ML 基于**历史分布**（是否异常）——两者关注不同问题，**不一致是正常现象**；
+  报告推荐**策略C 组合裁决**（两者皆异常才确认报警，不一致转入人工复核，减少误报和漏报）。
+  Web 端 4 组回归数据对照页：`http://localhost:8080/compare.html`
 
 自动化验证（可选，用于 Web 监测台回归测试）：
 ```bash
@@ -92,7 +102,11 @@ nova-tidewatch-final-2026/
 3. 启动水文节点模拟器：`python3 python/mqtt_node.py --interval 5`
 4. 浏览器访问 `http://localhost:8000/api/state` 查看实时状态（健康检查 `/api/health`）
 5. 前端页面：`cd web && python3 -m http.server 8080`，然后访问
-   Web 监测台 `http://localhost:8080/index.html` ｜ 移动端 `http://localhost:8080/mobile.html` ｜ 3D 数字空间 `http://localhost:8080/3d.html` ｜ 多模态（Camera/ASR/TTS）`http://localhost:8080/multimodal.html`
+   - Web 监测台（D1/D2/D3）：`http://localhost:8080/index.html`
+   - 移动端 H5（E3）：`http://localhost:8080/mobile.html`
+   - 3D 数字空间（E1）：`http://localhost:8080/3d.html`
+   - 多模态交互（E2）：`http://localhost:8080/multimodal.html`
+   - 规则/ML 对照（D5）：`http://localhost:8080/compare.html`
 
 手动发送一条测试消息：
 ```bash
@@ -110,6 +124,21 @@ D4 故障注入与修复（5 种故障自动验证）：
 python3 scripts/inject_fault.py --fault broker-down [--recover]   # 演示用：注入单个故障/修复
 python3 scripts/verify_fault.py                                   # 自动验证 5 种故障（约90秒）
 ```
+
+## 场景复现
+
+完整复现步骤见 [evidence/Reproduce/README.md](evidence/Reproduce/README.md)。
+
+各场景一键验证命令：
+
+| 场景 | 命令 | 说明 |
+|------|------|------|
+| D1 多断面稳定运行 | `python3 scripts/verify_web.py` | 不串线/断线横幅/自动重连 |
+| D2 优先关注 | `python3 scripts/test_priority.py` | 3 组数据优先断面随数据变化 |
+| D3 事件状态机 | `python3 scripts/test_event_flow.py` | OPEN→HANDLING→RECOVERED 闭环 |
+| D4 故障注入 | `python3 scripts/verify_fault.py` | 5 种故障自动验证 |
+| D5 规则/ML 对照 | `python3 python/compare_rule_ml.py` | 一致率+3 种组合策略 |
+| 统一规则 | `python3 python/rules.py` | 4 组回归测试 4/4 通过 |
 
 ## 回归测试
 ```bash
