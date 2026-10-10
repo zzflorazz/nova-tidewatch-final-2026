@@ -153,6 +153,63 @@ python3 scripts/verify_fault.py                                   # 自动验证
 | D5 规则/ML 对照 | `python3 python/compare_rule_ml.py` | 一致率+3 种组合策略 |
 | 统一规则 | `python3 python/rules.py` | 4 组回归测试 4/4 通过 |
 
+## 验证 Web—移动端实时同步
+
+1. 启动全链路（Broker → shared_state → event_manager → mqtt_node → web server）
+2. 桌面端打开 `http://localhost:8080/index.html`
+3. 移动端（或浏览器 F12 切移动视图）打开 `http://localhost:8080/mobile.html`
+4. 发送一条洪水预警数据：`python3 scripts/send_test_msg.py --reach reach-b --water 9.0 --turbidity 20 --flow 2`
+5. **预期**：两端同时显示 reach-b 为洪水预警，事件卡片变为 OPEN
+6. 在桌面端点击"开始处理" → **预期**：移动端事件卡片同步变为 HANDLING
+7. 发送正常数据后，在移动端点击"验证恢复" → **预期**：桌面端事件卡片同步变为 RECOVERED
+
+原理：两端订阅同一 MQTT topic（`tidewatch/+/data` 和 `tidewatch/events/+`），MQTT 广播天然保证一致性。
+
+## 正常情况下应看到的结果
+
+| 操作 | 预期结果 |
+|------|---------|
+| 启动 mqtt_node 后访问 /api/state | 返回 3 个断面的实时 JSON 数据 |
+| 打开 index.html | 3 个断面卡片显示水位/浊度/status，持续更新 |
+| 发送 waterLevel=9.0 | 对应断面卡片变红（洪水预警），自动创建 OPEN 事件 |
+| 点击"开始处理" | 事件状态变黄（HANDLING） |
+| 发送正常数据后点"验证恢复" | 事件状态变绿（RECOVERED） |
+| 打开 3d.html | 看到 3D 河道，3 断面标记颜色随状态变化 |
+| 打开 multimodal.html | 摄像头预览正常，语音指令可执行 |
+
+## 常见问题与排查
+
+| 问题 | 排查方法 |
+|------|---------|
+| MQTT 连不上 | 检查 mosquitto 是否运行：`ps aux \| grep mosquitto`；端口 1883/8083 是否被占用 |
+| Web 不更新数据 | 检查 mqtt_node 是否在运行；shared_state 日志是否有报错；浏览器控制台是否有 MQTT 连接错误 |
+| 断面显示离线 | 检查 mqtt_node 是否在发布；/api/health 中 age_seconds 是否 > 10 |
+| 中文显示方框 | matplotlib 中文字体问题，需安装 PingFang SC 或 SimHei |
+| 语音识别无反应 | 使用 Chrome/Edge 浏览器；检查麦克风权限是否授权 |
+| 摄像头打不开 | 使用 localhost 访问（非 IP）；检查摄像头权限 |
+
+## 已知限制
+
+1. **数据来源**：水文数据由 mqtt_node.py 模拟器随机生成，未接入真实传感器
+2. **ML 模型**：IsolationForest 训练数据仅 60 条历史样本，异常判断可能不够稳定；对未见数据可能误报或漏报
+3. **flowLevel 感知**：当前 source 为 `rule` 或 `simulated`（共同完成线），未使用真实视觉模型；confidence 为 null
+4. **移动端**：H5 页面需浏览器打开，非原生微信小程序
+5. **3D 场景**：简化河道模型，非真实地理数据
+6. **语音识别**：依赖浏览器 Web Speech API，Chrome 支持最好，Safari 部分功能受限
+
+## 开源库与资料来源
+
+| 库/工具 | 用途 | 来源 |
+|---------|------|------|
+| mosquitto | MQTT Broker | https://mosquitto.org/ |
+| paho-mqtt | Python MQTT 客户端 | https://www.eclipse.org/paho/ |
+| mqtt.js | 浏览器 MQTT 客户端 | https://github.com/mqttjs/MQTT.js |
+| pandas | 数据分析 | https://pandas.pydata.org/ |
+| matplotlib | 图表绘制 | https://matplotlib.org/ |
+| scikit-learn | IsolationForest 异常检测 | https://scikit-learn.org/ |
+| Three.js | 3D 渲染 | https://threejs.org/ |
+| Web Speech API | ASR + TTS | https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Speech_API |
+
 ## 回归测试
 ```bash
 cd python && python3 rules.py
