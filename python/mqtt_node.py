@@ -36,10 +36,15 @@ except ImportError:
     HAS_PAHO = False
 
 
-def build_message(reach_id):
-    """生成一条模拟断面数据，status 由统一判级规则计算"""
-    water_level = round(random.uniform(3.0, 10.0), 1)
-    turbidity = random.randint(5, 90)
+def build_message(reach_id, calm=False):
+    """生成一条模拟断面数据，status 由统一判级规则计算
+    calm=True 时为平稳模式：只发正常范围数据（演示/录制用，不影响手动发送的受控场景）"""
+    if calm:
+        water_level = round(random.uniform(3.0, 6.5), 1)
+        turbidity = random.randint(5, 55)
+    else:
+        water_level = round(random.uniform(3.0, 10.0), 1)
+        turbidity = random.randint(5, 90)
     flow_level = random.randint(0, 3)
 
     result = judge(water_level, turbidity)
@@ -69,6 +74,8 @@ def main():
                         help="发布的断面，默认 all（三断面一起发布）")
     parser.add_argument("--interval", type=float, default=5,
                         help="发布间隔秒数，默认 5")
+    parser.add_argument("--calm", action="store_true",
+                        help="平稳模式：只发正常数据（演示/录制用）")
     args = parser.parse_args()
 
     reaches = REACHES if args.reach == "all" else [args.reach]
@@ -98,7 +105,7 @@ def main():
     try:
         while True:
             for reach_id in reaches:
-                msg = build_message(reach_id)
+                msg = build_message(reach_id, args.calm)
                 topic = TOPIC_TEMPLATE.format(reachId=reach_id)
                 payload = json.dumps(msg, ensure_ascii=False)
                 print(f"[{msg['time']}] {topic} -> {payload}")

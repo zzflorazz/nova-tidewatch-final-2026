@@ -30,7 +30,8 @@ BROKER_HOST = "localhost"
 BROKER_PORT = 1883
 HTTP_HOST = "0.0.0.0"   # 绑定所有网卡，便于局域网内多端访问
 HTTP_PORT = 8000
-OFFLINE_THRESHOLD = 10  # 秒，last_seen 距今超过该值标记 offline
+# 秒；last_seen 距今超过该值标记 offline（默认 10；可用环境变量放宽，如演示/录制）
+OFFLINE_THRESHOLD = int(os.environ.get("TIDEWATCH_OFFLINE_THRESHOLD", "10"))
 
 REQUIRED_FIELDS = ["reachId", "waterLevel", "turbidity", "flowLevel", "status", "time"]
 
