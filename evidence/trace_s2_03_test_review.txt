@@ -1,0 +1,9 @@
+source_session=01a19acc-641a-7290-af23-1ef8e1da6be0
+source_line=235
+timestamp=2026-11-02T06:10:32.217Z
+role=assistant
+
+S2 已跑通：三断面的绝对变化量为 A=74、B=28、C=1，均按各自 IQR 判为异常。A 是唯一参与来源排序的候选，证据强度为中等；B 标记为 `propagation_path`，B/C 本地源排除项均有具体依据。
+
+目前 Trace 测试 23/23、旧规则 4/4 通过，包含窗口边界、B 时间或幅度改变后不再标为传播经过、输入顺序打乱及重复运行一致性。接下来检查最终 diff 和改动范围。
+

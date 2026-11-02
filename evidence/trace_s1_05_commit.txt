@@ -1,0 +1,14 @@
+commit 4c8a9e71d0151914f70c0a14da08052752d8392f
+Author:     萧逸 <xiaoyi@xiaoyideMacBook-Air.local>
+AuthorDate: Mon Nov 2 14:04:39 2026 +0800
+Commit:     萧逸 <xiaoyi@xiaoyideMacBook-Air.local>
+CommitDate: Mon Nov 2 14:04:39 2026 +0800
+
+    feat: 增加分断面IQR基线与S1回归测试
+
+ backend/__init__.py       |   1 +
+ backend/baseline.py       | 154 +++++++++++++
+ data/trace_scenarios.json | 543 ++++++++++++++++++++++++++++++++++++++++++++++
+ docs/m0-baseline.md       | 108 +++++++++
+ tests/test_trace.py       | 144 ++++++++++++
+ 5 files changed, 950 insertions(+)

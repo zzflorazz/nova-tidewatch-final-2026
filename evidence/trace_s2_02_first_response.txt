@@ -1,0 +1,7 @@
+source_session=01a19acc-641a-7290-af23-1ef8e1da6be0
+source_line=203
+timestamp=2026-11-02T06:07:57.237Z
+role=assistant
+
+我会先核对当前提交和现有 S1 实现，再新增 S2 场景、确定性候选排序及 B 传播经过判定，最后运行全部 Trace 测试和旧规则回归。
+

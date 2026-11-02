@@ -1,0 +1,12 @@
+commit 796c925265af7bfd900e2527b4b26de32f6f6150
+Author:     萧逸 <xiaoyi@xiaoyideMacBook-Air.local>
+AuthorDate: Mon Nov 2 14:14:07 2026 +0800
+Commit:     trae-solo-agent <solo-agent@trae.ai>
+CommitDate: Mon Nov 2 14:14:07 2026 +0800
+
+    feat: 增加S2溯源排序与传播经过判定
+
+ backend/attribution.py    | 231 ++++++++++++++++++++++++++++++++++++
+ data/trace_scenarios.json | 292 +++++++++++++++++++++++++++++++++++++++++++++-
+ tests/test_trace.py       | 153 +++++++++++++++++++++++-
+ 3 files changed, 668 insertions(+), 8 deletions(-)

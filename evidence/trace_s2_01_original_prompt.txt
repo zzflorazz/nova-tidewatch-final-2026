@@ -1,0 +1,141 @@
+source_session=01a19acc-641a-7290-af23-1ef8e1da6be0
+source_line=200
+timestamp=2026-11-02T06:07:48.846Z
+role=user
+
+
+项目目录：/Users/xiaoyi/nova-tidewatch-final-2026
+当前基线提交：4c8a9e7
+
+本次只完成第二阶段：S2 固定场景、候选来源生成与排序、B 断面“传播经过”判定。不要提前实现 S3～S5、FastAPI、SQLite、迟到数据或前端。
+
+先检查现有 backend/baseline.py、data/trace_scenarios.json 和 tests/test_trace.py，保留已经通过的 S1 功能。
+
+一、实现 S2 固定场景
+
+在 data/trace_scenarios.json 中把 S2 从 reserved 改为可执行场景，包含：
+
+- scenario_id: S2
+- 固定 seed、analysis_time: 2026-11-02T09:30:00+08:00
+- data_classification: SIMULATED
+- 拓扑：reach-a → reach-b → reach-c
+- B→C 传播窗口：8～20 分钟
+- A→C 传播窗口：15～35 分钟
+- 目标异常：reach-c 的 turbidity，event_time 为 2026-11-02T09:25:00+08:00
+- 上游观测：
+  - reach-a turbidity=80，event_time=2026-11-02T09:00:00+08:00
+  - reach-b turbidity=40，event_time=2026-11-02T09:12:00+08:00
+  - reach-c turbidity=25，event_time=2026-11-02T09:25:00+08:00
+- 为三个断面提供各自独立的 turbidity 历史样本和 baseline_config；
+- 基线中位数分别约为 A=6、B=12、C=24，确保三者按自身 IQR 都能被真实计算为异常；
+- 绝对变化量必须满足 A > B > C；
+- local_records 为空；
+- 所有样本包含 reach_id、metric、value、event_time、received_time、source: simulated。
+
+不得通过 scenario_id 或硬编码结论绕过基线、时间窗口和候选计算。
+
+二、新增 backend/attribution.py
+
+实现确定性的规则归因：
+
+1. 从目标断面 reach-c 沿拓扑逆水流方向生成上游候选 A、B，并生成本地源检查项。
+2. 调用现有 baseline.py 计算各断面自身基线、偏离度和绝对变化量，不复制另一套基线算法。
+3. 每条候选至少输出：
+   - source_id
+   - source_type: upstream/local
+   - event_time
+   - time_lag_minutes
+   - propagation_window
+   - absolute_change
+   - topology_distance
+   - local_evidence
+   - ranking_score
+   - evidence_strength
+   - status
+   - role
+   - exclude_basis
+   - evidence_gaps
+4. 时间窗口必须根据 event_time 计算；不在窗口内的候选不能按有效上游来源排序。
+5. 排名使用固定、可解释的规则权重，综合时间、绝对变化量、拓扑和本地证据；权重集中在配置中，不使用随机数。
+6. ranking_score 只表示相对排序分，不是概率，不得输出因果概率。
+
+三、实现 B“传播经过”判定
+
+当 B 同时满足以下条件时：
+
+- B 异常晚于 A；
+- B 与 A/C 的时间关系符合传播窗口；
+- B 的绝对变化量不超过 A；
+- A→B→C 拓扑成立；
+- 没有独立本地证据支持 B；
+
+则将 B 标记为：
+
+- role: propagation_path
+- status: propagation
+- 不作为独立来源参与来源排序；
+- 保留在结果中用于展示传播路径；
+- 给出明确说明：B 是 A 异常向下游传播的经过断面，不是第二个独立来源。
+
+四、S2 输出要求
+
+提供 analyze_attribution(scenario) 和 CLI：
+
+python3 -m backend.attribution --scenario S2
+
+输出必须是结构化 JSON，至少包含：
+
+- target_anomaly
+- candidates
+- propagation_path
+- excluded
+- conclusion
+- evidence_gaps
+
+S2 必须得到：
+
+- conclusion 使用“证据支持单源A”或同义的非因果表述；
+- A 是有效独立来源候选，证据强度为中等；
+- A 的绝对变化量最大且时间最早；
+- B 为 propagation_path，不算独立来源；
+- B/C 本地源排除项都有具体 exclude_basis；
+- 不出现“A导致C”“已证明来源”等因果断言；
+- 相同输入重复运行结果一致。
+
+五、测试
+
+在 tests/test_trace.py 中新增并实际运行：
+
+- test_single_source_s2
+- test_b_is_propagation_not_independent
+- test_s2_time_windows
+- test_s2_absolute_change_decay
+- test_s2_exclusion_basis_present
+- test_s2_deterministic
+
+同时验证：
+
+- 打乱候选或样本输入顺序不改变最终来源结论；
+- 修改 B 时间使其不满足传播窗口时，不能继续按原逻辑标为传播经过；
+- 所有 status=excluded 的项目都有非空 exclude_basis；
+- 原 S1 测试继续通过；
+- 将原来的 reserved 场景测试更新为只检查尚未实现的 S3～S5，不要删除原测试覆盖。
+
+最终运行：
+
+python3 -m pytest tests/test_trace.py -q
+python3 python/rules.py
+python3 -m backend.attribution --scenario S2
+
+限制：
+
+- 不自动执行 git add、git commit、git push；
+- 不修改 Git 历史或时间戳；
+- 不复制外部开源项目源码；
+- 不做无关重构；
+- 不提前实现后续阶段；
+- 不伪造测试或输出；
+- 完成后检查 git diff，只保留本任务相关改动。
+
+完成后输出改动文件清单、实际测试命令与结果、S2 运行验证方式。
+

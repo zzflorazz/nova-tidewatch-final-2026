@@ -1,0 +1,67 @@
+source_session=01a19acc-641a-7290-af23-1ef8e1da6be0
+source_line=15
+timestamp=2026-11-02T05:47:45.268Z
+role=user
+
+项目目录：/Users/xiaoyi/nova-tidewatch-final-2026
+
+本次只完成第一阶段：M0 基线记录、分断面中位数与 IQR 基线、S1 自动化测试。不要提前实现候选归因、FastAPI、SQLite 或前端。
+
+先阅读仓库 README，以及以下两份文档：
+1. /Users/xiaoyi/Desktop/P03_TideWatch_Trace_V1.0/S03-B_案例B-P03_TideWatch_Trace_V1.0_反演溯源_学生案例书_V0.8R1.md
+2. /Users/xiaoyi/Desktop/P03_TideWatch_Trace_V1.0/S03-B_案例B-P03_TideWatch_Trace_V1.0_反演溯源_学生实践指南_V0.8R1.md
+
+执行要求：
+
+1. 新建 docs/m0-baseline.md，记录：
+   - 当前 Git Hash、日期、Python 版本、启动命令和端口；
+   - 已完成的真实验证：三断面在线、reach-b 受控消息不串线、Web 无运行错误、旧规则测试 4/4 通过；
+   - 使用 REUSE / ADAPT / NEW 整理现有资产和 Trace 待新增能力；
+   - 明确旧固定阈值只负责告警，旧事件链丢弃迟到数据的行为不能直接用于 Trace。
+   不得伪造截图、对话或测试记录。
+
+2. 新增：
+   - backend/__init__.py
+   - backend/baseline.py
+   - data/trace_scenarios.json
+   - tests/test_trace.py
+
+3. 在 trace_scenarios.json 中先实现 S1：
+   - 包含 scenario_id、seed、analysis_time；
+   - 包含 data_classification: SIMULATED；
+   - 样本包含 reach_id、metric、value、event_time、received_time、source: simulated；
+   - 覆盖 reach-a、reach-b、reach-c；
+   - 每个断面都有独立的历史基线样本和当前样本；
+   - 当前值处于各自历史正常波动范围；
+   - 只预留 S2～S5 结构，本次不实现其归因逻辑。
+
+4. 在 baseline.py 中实现：
+   - 按 reach_id + metric 独立计算中位数、Q1、Q3、IQR；
+   - 偏离度 = (当前值 - 中位数) / IQR；
+   - 绝对变化量 = abs(当前值 - 中位数)；
+   - 使用配置化的偏离度阈值判断异常，禁止用统一原始水位或浊度阈值代替基线；
+   - IQR 为 0 时使用确定性的最小噪声降级规则并记录 fallback，禁止除零；
+   - 不调用旧 judge() 替代基线，不读写全局状态。
+
+5. 编写并实际运行测试：
+   - test_baseline_s1：S1 无活动异常；
+   - 基线隔离：修改 reach-a 历史不影响 reach-b/c；
+   - 零 IQR：不除零且结果确定；
+   - 绝对变化量：没有误用基线倍数。
+   
+   运行：
+   python3 -m pytest tests/test_trace.py -q
+   python3 python/rules.py
+
+   Trace 测试必须全部通过，旧规则必须保持 4/4 通过。
+
+限制：
+- 保留所有现有 C02 功能，不做无关重构；
+- 不自动执行 git add、git commit、git push；
+- 不修改 Git 历史或时间戳；
+- 不复制外部开源项目源码；
+- 不通过硬编码“S1 正常”绕过真实计算；
+- 完成后检查 git diff，确保只有本任务相关改动。
+
+完成后输出：改动文件清单、实际测试命令与结果、S1 基线运行验证方式。
+
