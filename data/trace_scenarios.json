@@ -1,0 +1,543 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "scenario_id": "S1",
+      "seed": 20261102,
+      "analysis_time": "2026-11-02T09:46:00+08:00",
+      "data_classification": "SIMULATED",
+      "status": "implemented",
+      "description": "三断面浊度与流量在各自历史正常波动范围内。",
+      "baseline_config": {
+        "turbidity": {
+          "deviation_threshold": 3.0,
+          "min_noise": 0.1
+        },
+        "flow": {
+          "deviation_threshold": 3.0,
+          "min_noise": 0.01
+        }
+      },
+      "history_samples": [
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 5.0,
+          "event_time": "2026-11-02T09:00:00+08:00",
+          "received_time": "2026-11-02T09:00:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 5.5,
+          "event_time": "2026-11-02T09:05:00+08:00",
+          "received_time": "2026-11-02T09:05:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.0,
+          "event_time": "2026-11-02T09:10:00+08:00",
+          "received_time": "2026-11-02T09:10:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.5,
+          "event_time": "2026-11-02T09:15:00+08:00",
+          "received_time": "2026-11-02T09:15:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 7.0,
+          "event_time": "2026-11-02T09:20:00+08:00",
+          "received_time": "2026-11-02T09:20:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 5.5,
+          "event_time": "2026-11-02T09:25:00+08:00",
+          "received_time": "2026-11-02T09:25:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.0,
+          "event_time": "2026-11-02T09:30:00+08:00",
+          "received_time": "2026-11-02T09:30:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.5,
+          "event_time": "2026-11-02T09:35:00+08:00",
+          "received_time": "2026-11-02T09:35:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.0,
+          "event_time": "2026-11-02T09:40:00+08:00",
+          "received_time": "2026-11-02T09:40:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "flow",
+          "value": 0.9,
+          "event_time": "2026-11-02T09:00:00+08:00",
+          "received_time": "2026-11-02T09:00:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "flow",
+          "value": 0.95,
+          "event_time": "2026-11-02T09:05:00+08:00",
+          "received_time": "2026-11-02T09:05:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "flow",
+          "value": 1.0,
+          "event_time": "2026-11-02T09:10:00+08:00",
+          "received_time": "2026-11-02T09:10:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "flow",
+          "value": 1.05,
+          "event_time": "2026-11-02T09:15:00+08:00",
+          "received_time": "2026-11-02T09:15:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "flow",
+          "value": 1.1,
+          "event_time": "2026-11-02T09:20:00+08:00",
+          "received_time": "2026-11-02T09:20:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "flow",
+          "value": 0.95,
+          "event_time": "2026-11-02T09:25:00+08:00",
+          "received_time": "2026-11-02T09:25:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "flow",
+          "value": 1.0,
+          "event_time": "2026-11-02T09:30:00+08:00",
+          "received_time": "2026-11-02T09:30:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "flow",
+          "value": 1.05,
+          "event_time": "2026-11-02T09:35:00+08:00",
+          "received_time": "2026-11-02T09:35:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "flow",
+          "value": 1.0,
+          "event_time": "2026-11-02T09:40:00+08:00",
+          "received_time": "2026-11-02T09:40:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 11.0,
+          "event_time": "2026-11-02T09:00:00+08:00",
+          "received_time": "2026-11-02T09:00:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 11.5,
+          "event_time": "2026-11-02T09:05:00+08:00",
+          "received_time": "2026-11-02T09:05:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 12.0,
+          "event_time": "2026-11-02T09:10:00+08:00",
+          "received_time": "2026-11-02T09:10:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 12.5,
+          "event_time": "2026-11-02T09:15:00+08:00",
+          "received_time": "2026-11-02T09:15:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 13.0,
+          "event_time": "2026-11-02T09:20:00+08:00",
+          "received_time": "2026-11-02T09:20:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 11.5,
+          "event_time": "2026-11-02T09:25:00+08:00",
+          "received_time": "2026-11-02T09:25:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 12.0,
+          "event_time": "2026-11-02T09:30:00+08:00",
+          "received_time": "2026-11-02T09:30:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 12.5,
+          "event_time": "2026-11-02T09:35:00+08:00",
+          "received_time": "2026-11-02T09:35:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 12.0,
+          "event_time": "2026-11-02T09:40:00+08:00",
+          "received_time": "2026-11-02T09:40:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "flow",
+          "value": 1.4,
+          "event_time": "2026-11-02T09:00:00+08:00",
+          "received_time": "2026-11-02T09:00:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "flow",
+          "value": 1.45,
+          "event_time": "2026-11-02T09:05:00+08:00",
+          "received_time": "2026-11-02T09:05:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "flow",
+          "value": 1.5,
+          "event_time": "2026-11-02T09:10:00+08:00",
+          "received_time": "2026-11-02T09:10:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "flow",
+          "value": 1.55,
+          "event_time": "2026-11-02T09:15:00+08:00",
+          "received_time": "2026-11-02T09:15:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "flow",
+          "value": 1.6,
+          "event_time": "2026-11-02T09:20:00+08:00",
+          "received_time": "2026-11-02T09:20:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "flow",
+          "value": 1.45,
+          "event_time": "2026-11-02T09:25:00+08:00",
+          "received_time": "2026-11-02T09:25:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "flow",
+          "value": 1.5,
+          "event_time": "2026-11-02T09:30:00+08:00",
+          "received_time": "2026-11-02T09:30:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "flow",
+          "value": 1.55,
+          "event_time": "2026-11-02T09:35:00+08:00",
+          "received_time": "2026-11-02T09:35:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "flow",
+          "value": 1.5,
+          "event_time": "2026-11-02T09:40:00+08:00",
+          "received_time": "2026-11-02T09:40:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 23.0,
+          "event_time": "2026-11-02T09:00:00+08:00",
+          "received_time": "2026-11-02T09:00:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 23.5,
+          "event_time": "2026-11-02T09:05:00+08:00",
+          "received_time": "2026-11-02T09:05:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 24.0,
+          "event_time": "2026-11-02T09:10:00+08:00",
+          "received_time": "2026-11-02T09:10:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 24.5,
+          "event_time": "2026-11-02T09:15:00+08:00",
+          "received_time": "2026-11-02T09:15:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 25.0,
+          "event_time": "2026-11-02T09:20:00+08:00",
+          "received_time": "2026-11-02T09:20:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 23.5,
+          "event_time": "2026-11-02T09:25:00+08:00",
+          "received_time": "2026-11-02T09:25:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 24.0,
+          "event_time": "2026-11-02T09:30:00+08:00",
+          "received_time": "2026-11-02T09:30:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 24.5,
+          "event_time": "2026-11-02T09:35:00+08:00",
+          "received_time": "2026-11-02T09:35:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 24.0,
+          "event_time": "2026-11-02T09:40:00+08:00",
+          "received_time": "2026-11-02T09:40:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "flow",
+          "value": 1.9,
+          "event_time": "2026-11-02T09:00:00+08:00",
+          "received_time": "2026-11-02T09:00:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "flow",
+          "value": 1.95,
+          "event_time": "2026-11-02T09:05:00+08:00",
+          "received_time": "2026-11-02T09:05:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "flow",
+          "value": 2.0,
+          "event_time": "2026-11-02T09:10:00+08:00",
+          "received_time": "2026-11-02T09:10:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "flow",
+          "value": 2.05,
+          "event_time": "2026-11-02T09:15:00+08:00",
+          "received_time": "2026-11-02T09:15:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "flow",
+          "value": 2.1,
+          "event_time": "2026-11-02T09:20:00+08:00",
+          "received_time": "2026-11-02T09:20:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "flow",
+          "value": 1.95,
+          "event_time": "2026-11-02T09:25:00+08:00",
+          "received_time": "2026-11-02T09:25:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "flow",
+          "value": 2.0,
+          "event_time": "2026-11-02T09:30:00+08:00",
+          "received_time": "2026-11-02T09:30:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "flow",
+          "value": 2.05,
+          "event_time": "2026-11-02T09:35:00+08:00",
+          "received_time": "2026-11-02T09:35:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "flow",
+          "value": 2.0,
+          "event_time": "2026-11-02T09:40:00+08:00",
+          "received_time": "2026-11-02T09:40:02+08:00",
+          "source": "simulated"
+        }
+      ],
+      "current_samples": [
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.25,
+          "event_time": "2026-11-02T09:45:00+08:00",
+          "received_time": "2026-11-02T09:45:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "flow",
+          "value": 1.025,
+          "event_time": "2026-11-02T09:45:00+08:00",
+          "received_time": "2026-11-02T09:45:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 12.25,
+          "event_time": "2026-11-02T09:45:00+08:00",
+          "received_time": "2026-11-02T09:45:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "flow",
+          "value": 1.525,
+          "event_time": "2026-11-02T09:45:00+08:00",
+          "received_time": "2026-11-02T09:45:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 24.25,
+          "event_time": "2026-11-02T09:45:00+08:00",
+          "received_time": "2026-11-02T09:45:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "flow",
+          "value": 2.025,
+          "event_time": "2026-11-02T09:45:00+08:00",
+          "received_time": "2026-11-02T09:45:02+08:00",
+          "source": "simulated"
+        }
+      ]
+    },
+    {
+      "scenario_id": "S2",
+      "seed": null,
+      "analysis_time": null,
+      "data_classification": "SIMULATED",
+      "status": "reserved",
+      "history_samples": [],
+      "current_samples": []
+    },
+    {
+      "scenario_id": "S3",
+      "seed": null,
+      "analysis_time": null,
+      "data_classification": "SIMULATED",
+      "status": "reserved",
+      "history_samples": [],
+      "current_samples": []
+    },
+    {
+      "scenario_id": "S4",
+      "seed": null,
+      "analysis_time": null,
+      "data_classification": "SIMULATED",
+      "status": "reserved",
+      "history_samples": [],
+      "current_samples": []
+    },
+    {
+      "scenario_id": "S5",
+      "seed": null,
+      "analysis_time": null,
+      "data_classification": "SIMULATED",
+      "status": "reserved",
+      "history_samples": [],
+      "current_samples": []
+    }
+  ]
+}
