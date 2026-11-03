@@ -1,0 +1,227 @@
+{
+  "scenario_id": "S3",
+  "seed": 2026110303,
+  "analysis_time": "2026-11-02T11:05:00+08:00",
+  "data_classification": "SIMULATED",
+  "target_anomaly": {
+    "reach_id": "reach-c",
+    "metric": "turbidity",
+    "value": 40,
+    "event_time": "2026-11-02T11:00:00+08:00",
+    "received_time": "2026-11-02T11:00:02+08:00",
+    "source": "simulated",
+    "sample_count": 9,
+    "median": 8.0,
+    "q1": 7.5,
+    "q3": 8.5,
+    "iqr": 1.0,
+    "effective_iqr": 1.0,
+    "fallback": null,
+    "deviation": 32.0,
+    "absolute_change": 32.0,
+    "deviation_threshold": 3.0,
+    "is_anomaly": true
+  },
+  "candidates": [
+    {
+      "source_id": "reach-c:local",
+      "source_type": "local",
+      "event_time": "2026-11-02T10:55:00+08:00",
+      "time_lag_minutes": 5.0,
+      "propagation_window": null,
+      "absolute_change": 32.0,
+      "topology_distance": 0,
+      "local_evidence": [
+        {
+          "record_id": "s3-c-construction-01",
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "event_time": "2026-11-02T10:55:00+08:00",
+          "source": "manual",
+          "entered_by": "simulated_operator",
+          "verification_status": "pending",
+          "data_classification": "SIMULATED",
+          "description": "教学模拟：C 附近施工记录，尚未核实。",
+          "evidence_strength": "待核实"
+        }
+      ],
+      "ranking_score": 85.714286,
+      "score_components": {
+        "time": 0.8571428571428572,
+        "absolute_change": 1.0,
+        "topology": 1.0,
+        "local_evidence": 0.5
+      },
+      "evidence_strength": "待核实",
+      "status": "retained",
+      "role": "independent_source",
+      "exclude_basis": [],
+      "evidence_gaps": [
+        "本地记录仅为侧证据，不能单独确认来源。",
+        "人工或模拟本地记录待核实；保留来源、录入人与核实状态，不等同于传感器证据。"
+      ],
+      "rank": 1
+    },
+    {
+      "source_id": "reach-a",
+      "source_type": "upstream",
+      "event_time": "2026-11-02T10:45:00+08:00",
+      "time_lag_minutes": 15.0,
+      "propagation_window": {
+        "min_minutes": 5,
+        "max_minutes": 35
+      },
+      "absolute_change": 4.0,
+      "topology_distance": 2,
+      "local_evidence": [],
+      "ranking_score": 30.0,
+      "score_components": {
+        "time": 0.6666666666666667,
+        "absolute_change": 0.125,
+        "topology": 0.5,
+        "local_evidence": 0.0
+      },
+      "evidence_strength": "弱",
+      "status": "retained",
+      "role": "independent_source",
+      "exclude_basis": [],
+      "evidence_gaps": [
+        "缺少连续的中间断面传播证据，不能单独确认上游来源。",
+        "目标绝对变化量大于该上游断面，尚缺幅度放大的解释或本地侧核验。"
+      ],
+      "rank": 2
+    },
+    {
+      "source_id": "reach-b",
+      "source_type": "upstream",
+      "event_time": "2026-11-02T10:50:00+08:00",
+      "time_lag_minutes": 10.0,
+      "propagation_window": {
+        "min_minutes": 3,
+        "max_minutes": 20
+      },
+      "absolute_change": 0.09999999999999964,
+      "topology_distance": 1,
+      "local_evidence": [],
+      "ranking_score": 0.0,
+      "score_components": {
+        "time": 0.8235294117647058,
+        "absolute_change": 0.003124999999999989,
+        "topology": 1.0,
+        "local_evidence": 0.0
+      },
+      "evidence_strength": "不支持",
+      "status": "excluded",
+      "role": "excluded",
+      "exclude_basis": [
+        "该断面按自身中位数与 IQR 计算无活动异常。"
+      ],
+      "evidence_gaps": [],
+      "rank": null
+    },
+    {
+      "source_id": "reach-b:local",
+      "source_type": "local",
+      "event_time": "2026-11-02T10:50:00+08:00",
+      "time_lag_minutes": null,
+      "propagation_window": null,
+      "absolute_change": 0.09999999999999964,
+      "topology_distance": 1,
+      "local_evidence": [],
+      "ranking_score": 0.0,
+      "score_components": {
+        "time": 0.0,
+        "absolute_change": 0.003124999999999989,
+        "topology": 0.5,
+        "local_evidence": 0.0
+      },
+      "evidence_strength": "弱",
+      "status": "needs_review",
+      "role": "local_check",
+      "exclude_basis": [],
+      "evidence_gaps": [
+        "缺少独立本地证据，不能确认或排除本地来源。"
+      ],
+      "rank": null
+    }
+  ],
+  "independent_sources": [
+    "reach-c:local",
+    "reach-a"
+  ],
+  "propagation_path": [],
+  "excluded": [
+    {
+      "source_id": "reach-b",
+      "source_type": "upstream",
+      "event_time": "2026-11-02T10:50:00+08:00",
+      "time_lag_minutes": 10.0,
+      "propagation_window": {
+        "min_minutes": 3,
+        "max_minutes": 20
+      },
+      "absolute_change": 0.09999999999999964,
+      "topology_distance": 1,
+      "local_evidence": [],
+      "ranking_score": 0.0,
+      "score_components": {
+        "time": 0.8235294117647058,
+        "absolute_change": 0.003124999999999989,
+        "topology": 1.0,
+        "local_evidence": 0.0
+      },
+      "evidence_strength": "不支持",
+      "status": "excluded",
+      "role": "excluded",
+      "exclude_basis": [
+        "该断面按自身中位数与 IQR 计算无活动异常。"
+      ],
+      "evidence_gaps": [],
+      "rank": null
+    }
+  ],
+  "conclusion": "多源候选，来源未定；按相对证据排序保留 reach-c:local、reach-a",
+  "status": "MULTI_CANDIDATE",
+  "evidence_gaps": [
+    "时间先后与幅度衰减仅支持关联，缺少独立采样及水动力验证，不能证明因果来源。",
+    "传播路径或本地排除证据不完整，不能沿用完整路径下的单源结论。",
+    "本地记录仅为侧证据，不能单独确认来源。",
+    "人工或模拟本地记录待核实；保留来源、录入人与核实状态，不等同于传感器证据。",
+    "缺少连续的中间断面传播证据，不能单独确认上游来源。",
+    "目标绝对变化量大于该上游断面，尚缺幅度放大的解释或本地侧核验。",
+    "缺少独立本地证据，不能确认或排除本地来源。"
+  ],
+  "data_health": {
+    "reach-a": {
+      "status": "fresh",
+      "age_minutes": 20.0
+    },
+    "reach-b": {
+      "status": "fresh",
+      "age_minutes": 15.0
+    },
+    "reach-c": {
+      "status": "fresh",
+      "age_minutes": 5.0
+    }
+  },
+  "next_checks": [
+    {
+      "priority": 1,
+      "reach_id": "reach-c",
+      "action": "核查附近排口与施工记录，确认来源和录入信息。"
+    },
+    {
+      "priority": 2,
+      "reach_id": "reach-c",
+      "action": "必要时人工采样，补充独立核验依据。"
+    }
+  ],
+  "ranking_weights": {
+    "time": 30.0,
+    "absolute_change": 40.0,
+    "topology": 10.0,
+    "local_evidence": 20.0
+  },
+  "ranking_score_meaning": "相对排序分，不是概率"
+}

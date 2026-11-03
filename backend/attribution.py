@@ -1,4 +1,4 @@
-"""Deterministic, offline source screening for a complete fixed snapshot.
+"""Deterministic, offline source screening for fixed simulated snapshots.
 
 Reuses baseline.analyze_scenario; there is no alternate baseline algorithm.
 Windows are inclusive event-time minutes. Scores sum configured weights times:
@@ -57,12 +57,10 @@ def rank_candidates(candidates):
 
 
 def analyze_attribution(scenario):
-    """Screen a complete chain snapshot without scenario-id shortcuts or state.
+    """Screen supplied evidence without scenario-id shortcuts or global state.
 
-    Multiple observations for one reach/metric are rejected in this phase;
-    selecting episodes, missing-data recovery and late samples are out of scope.
-    Local records block a no-independent-evidence exclusion; this phase does
-    not resolve competing local sources.
+    Missing/stale upstream observations remain unexcluded; manual local records
+    remain pending verification. No history store or late-data replay is used.
     """
     report = analyze_scenario(scenario)
     target_spec = scenario['target']
@@ -78,8 +76,8 @@ def analyze_attribution(scenario):
             if result['reach_id'] in observations:
                 raise ValueError('Expected one current observation per reach/metric')
             observations[result['reach_id']] = result
-    if set(observations) != set(chain):
-        raise ValueError('This phase requires a complete chain snapshot')
+    if chain[-1] not in observations:
+        raise ValueError('Target observation is required')
     target = observations[chain[-1]]
     if _time(target['event_time']) != _time(target_spec['event_time']) or not target['is_anomaly']:
         raise ValueError('Target must identify a computed active anomaly')
@@ -90,20 +88,71 @@ def analyze_attribution(scenario):
         for v in weights.values()
     ) or sum(weights.values()) == 0:
         raise ValueError('Ranking weights must be finite nonnegative values with positive sum')
+    settings = scenario['attribution_config']
+    cutoff = _time(scenario['analysis_time'])
+    max_age = settings.get('max_sample_age_minutes')
+    local_window = settings.get('local_evidence_window_minutes', 35)
+    for name, value in [('max_sample_age_minutes', max_age),
+                        ('local_evidence_window_minutes', local_window)]:
+        if name == 'local_evidence_window_minutes' and value is None:
+            raise ValueError(f'{name} must be a finite positive number')
+        if value is not None and (isinstance(value, bool) or not isinstance(value, (int, float))
+                                  or not math.isfinite(value) or value <= 0):
+            raise ValueError(f'{name} must be a finite positive number')
+    health = {}
+    for reach in chain:
+        observation = observations.get(reach)
+        age = ((cutoff - _time(observation['event_time'])).total_seconds() / 60
+               if observation else None)
+        health[reach] = {'status': 'missing' if observation is None else
+                         'stale' if max_age is not None and age > max_age else 'fresh',
+                         'age_minutes': age}
+    if health[chain[-1]]['status'] != 'fresh':
+        raise ValueError('Target observation is stale')
+    missing = [r for r in chain[:-1] if health[r]['status'] != 'fresh']
     local_records = scenario['local_records']
     for record in local_records:
-        if _time(record['event_time']) > _time(scenario['analysis_time']):
+        if _time(record['event_time']) > cutoff:
             raise ValueError('Local evidence is outside the analysis snapshot')
+        if record['source'] == 'manual' and not record.get('entered_by'):
+            raise ValueError('Manual local evidence requires entered_by')
 
     def evidence(reach):
-        return sorted((dict(r) for r in local_records if r['reach_id'] == reach),
-                      key=lambda r: json.dumps(r, sort_keys=True, ensure_ascii=False))
+        found = []
+        for record in local_records:
+            lag = (_time(target['event_time']) - _time(record['event_time'])).total_seconds() / 60
+            if (record['reach_id'] == reach and record.get('metric', metric) == metric
+                    and 0 <= lag <= local_window):
+                item = dict(record)
+                item.setdefault('verification_status', 'pending')
+                item['evidence_strength'] = ('中等' if item['verification_status'] == 'verified'
+                                              else '待核实')
+                found.append(item)
+        return sorted(found, key=lambda r: json.dumps(r, sort_keys=True, ensure_ascii=False))
 
-    largest_change = max(r['absolute_change'] for r in observations.values())
+    def local_support(records):
+        return max((1.0 if r['verification_status'] == 'verified' else 0.5
+                    for r in records), default=0.0)
+
+    largest_change = max(r['absolute_change'] for reach, r in observations.items()
+                         if health[reach]['status'] == 'fresh')
     candidates = []
     for source_index in range(target_index - 1, -1, -1):
         reach = chain[source_index]
-        observation = observations[reach]
+        observation = observations.get(reach)
+        if reach in missing:
+            candidates.append({
+                'source_id': reach, 'source_type': 'upstream',
+                'event_time': observation['event_time'] if observation else None,
+                'time_lag_minutes': None, 'propagation_window': _window(scenario, reach, chain[-1]),
+                'absolute_change': None, 'topology_distance': target_index - source_index,
+                'local_evidence': evidence(reach), 'ranking_score': 0.0,
+                'evidence_strength': '缺证据', 'status': 'not_excluded',
+                'role': 'missing_evidence', 'exclude_basis': [],
+                'evidence_gaps': [f'{reach} 数据缺失或过期，不能把最后一次正常观测用于当前排除。'],
+                'explanation': '未排除（缺证据）', 'data_health': health[reach],
+            })
+            continue
         lag = _lag(observation, target)
         window = _window(scenario, reach, target['reach_id'])
         distance = target_index - source_index
@@ -122,7 +171,7 @@ def analyze_attribution(scenario):
             'time': max(0.0, 1 - abs(lag - midpoint) / halfwidth),
             'absolute_change': observation['absolute_change'] / largest_change,
             'topology': 1 / distance,
-            'local_evidence': float(bool(local)),
+            'local_evidence': local_support(local),
         }
         candidates.append({
             'source_id': reach, 'source_type': 'upstream',
@@ -144,7 +193,7 @@ def analyze_attribution(scenario):
         if origin['status'] != 'retained':
             continue
         segment = chain[origin_index:]
-        if any(upstream[r]['status'] == 'excluded' for r in segment[:-1]):
+        if any(upstream[r]['status'] != 'retained' for r in segment[:-1]):
             continue
         valid = True
         for left, right in zip(segment, segment[1:]):
@@ -165,12 +214,17 @@ def analyze_attribution(scenario):
                         evidence_strength='中等',
                         explanation=f'证据支持 {reach} 为 {path[0]} 异常向下游传播的经过断面，'
                                     '不作为第二个独立来源；这不是因果证明。')
+    for candidate in candidates:
+        if candidate['status'] == 'retained' and candidate['evidence_strength'] == '弱':
+            candidate['evidence_gaps'].append('缺少连续的中间断面传播证据，不能单独确认上游来源。')
+            if candidate['absolute_change'] < target['absolute_change']:
+                candidate['evidence_gaps'].append('目标绝对变化量大于该上游断面，尚缺幅度放大的解释或本地侧核验。')
     # Local checks cover the target and intermediate reaches, without duplicating
     # the retained upstream origin as a separate local-source hypothesis.
     for index in range(1, len(chain)):
         reach = chain[index]
         local = evidence(reach)
-        supported = reach in path[1:] and not local
+        supported = reach in path[1:] and not local and not missing
         basis = []
         if supported:
             predecessor = chain[index - 1]
@@ -180,24 +234,67 @@ def analyze_attribution(scenario):
                      f"{observations[reach]['absolute_change']:g} 未放大。",
                      '本次固定模拟输入的 local_records 中无该断面独立本地记录；'
                      '仅在本场景证据范围内排除，不代表现实中不存在本地源。']
+        is_source = not supported and (bool(local) or reach == chain[-1])
+        record_lag = min(((_time(target['event_time']) - _time(r['event_time'])).total_seconds() / 60
+                          for r in local), default=None)
+        components = {
+            'time': max(0.0, 1 - record_lag / local_window) if local else 0.0,
+            'absolute_change': observations[reach]['absolute_change'] / largest_change
+                               if reach not in missing else 0.0,
+            'topology': 1 / (1 + target_index - index),
+            'local_evidence': local_support(local),
+        }
+        local_gaps = [] if supported else [
+            '本地记录仅为侧证据，不能单独确认来源。' if local else '缺少独立本地证据，不能确认或排除本地来源。']
+        if local and any(r['verification_status'] != 'verified' for r in local):
+            local_gaps.append('人工或模拟本地记录待核实；保留来源、录入人与核实状态，不等同于传感器证据。')
         candidates.append({
             'source_id': f'{reach}:local', 'source_type': 'local',
-            'event_time': observations[reach]['event_time'], 'time_lag_minutes': None,
-            'propagation_window': None, 'absolute_change': observations[reach]['absolute_change'],
+            'event_time': local[0]['event_time'] if local else
+                          observations[reach]['event_time'] if reach in observations else None,
+            'time_lag_minutes': record_lag,
+            'propagation_window': None,
+            'absolute_change': observations[reach]['absolute_change'] if reach not in missing else None,
             'topology_distance': target_index - index, 'local_evidence': local,
-            'ranking_score': 0.0, 'evidence_strength': '不支持' if supported else '待核实',
-            'status': 'excluded' if supported else 'needs_review', 'role': 'local_check',
-            'exclude_basis': basis,
-            'evidence_gaps': [] if supported else ['缺少足够的路径支持或存在独立本地证据，本阶段不裁定本地来源。'],
+            'ranking_score': round(sum(weights[k] * components[k] for k in weights), 6) if is_source else 0.0,
+            'score_components': components,
+            'evidence_strength': '不支持' if supported else
+                                 '中等' if local_support(local) == 1 else '待核实' if local else '弱',
+            'status': 'excluded' if supported else 'retained' if is_source else 'needs_review',
+            'role': 'independent_source' if is_source else 'local_check',
+            'exclude_basis': basis, 'evidence_gaps': local_gaps,
         })
     candidates = rank_candidates(candidates)
     sources = [c for c in candidates if c['rank'] is not None]
     gaps = ['时间先后与幅度衰减仅支持关联，缺少独立采样及水动力验证，不能证明因果来源。']
-    complete = bool(path) and len(sources) == 1 and sources[0]['source_id'] == path[0]
+    complete = (not missing and bool(path) and len(sources) == 1
+                and sources[0]['source_id'] == path[0]
+                and all(c['status'] == 'excluded' for c in candidates if c['source_type'] == 'local'))
+    checks = []
+    if missing:
+        state = 'UNRESOLVED'
+        conclusion = '来源未定｜关键上游 ' + '、'.join(missing) + ' 证据缺失'
+        gaps.extend(f'{reach} 缺测或观测过期，未排除（缺证据）。' for reach in missing)
+        checks.extend({'priority': i + 1, 'reach_id': reach, 'action': '优先恢复数据链并核对缺失时段观测。'}
+                      for i, reach in enumerate(missing))
+    elif complete:
+        state = 'SUPPORTED_SINGLE'
+        conclusion = f"证据支持单源{sources[0]['source_id']}（中等证据；非因果证明）"
+    elif len(sources) >= 2 and any(c['local_evidence'] for c in sources if c['source_type'] == 'local'):
+        state = 'MULTI_CANDIDATE'
+        conclusion = '多源候选，来源未定；按相对证据排序保留 ' + '、'.join(c['source_id'] for c in sources)
+    else:
+        state = 'UNRESOLVED'
+        conclusion = '当前证据不足以给出单源结论'
     if not complete:
         gaps.append('传播路径或本地排除证据不完整，不能沿用完整路径下的单源结论。')
-    conclusion = (f"证据支持单源{sources[0]['source_id']}（中等证据；非因果证明）" if complete
-                  else '当前证据不足以给出单源结论')
+        checks.extend([
+            {'priority': len(checks) + 1, 'reach_id': chain[-1], 'action': '核查附近排口与施工记录，确认来源和录入信息。'},
+            {'priority': len(checks) + 2, 'reach_id': chain[-1], 'action': '必要时人工采样，补充独立核验依据。'},
+        ])
+    for candidate in candidates:
+        gaps.extend(candidate['evidence_gaps'])
+    gaps = list(dict.fromkeys(gaps))
     return {
         'scenario_id': report['scenario_id'], 'seed': report['seed'],
         'analysis_time': report['analysis_time'], 'data_classification': report['data_classification'],
@@ -205,7 +302,8 @@ def analyze_attribution(scenario):
         'independent_sources': [c['source_id'] for c in sources],
         'propagation_path': [c for c in candidates if c['role'] == 'propagation_path'],
         'excluded': [c for c in candidates if c['status'] == 'excluded'],
-        'conclusion': conclusion, 'evidence_gaps': gaps,
+        'conclusion': conclusion, 'status': state, 'evidence_gaps': gaps,
+        'data_health': health, 'next_checks': checks,
         'ranking_weights': dict(weights), 'ranking_score_meaning': '相对排序分，不是概率',
     }
 

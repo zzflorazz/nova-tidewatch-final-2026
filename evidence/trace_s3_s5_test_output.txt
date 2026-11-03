@@ -1,0 +1,11 @@
+$ /private/tmp/tidewatch-m0-venv/bin/python -m pytest tests -q
+.........................................                                [100%]
+41 passed in 0.12s
+
+$ python3 python/rules.py
+测试 1: waterLevel=4.5, turbidity=20 → 正常 (期望 正常) ✓
+测试 2: waterLevel=7.6, turbidity=20 → 高水位警戒 (期望 高水位警戒) ✓
+测试 3: waterLevel=9.0, turbidity=20 → 洪水预警 (期望 洪水预警) ✓
+测试 4: waterLevel=4.5, turbidity=75 → 水质浑浊 (期望 水质浑浊) ✓
+
+通过 4/4

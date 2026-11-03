@@ -136,8 +136,9 @@ def test_analysis_snapshot_and_history_separation():
 
 def test_other_scenarios_are_reserved():
     path = Path(__file__).resolve().parents[1] / "data/trace_scenarios.json"
-    reserved = json.loads(path.read_text(encoding="utf-8"))["scenarios"][2:]
-    assert [s["scenario_id"] for s in reserved] == ["S3", "S4", "S5"]
+    reserved = [s for s in json.loads(path.read_text(encoding="utf-8"))["scenarios"]
+                if s["scenario_id"] == "S4"]
+    assert [s["scenario_id"] for s in reserved] == ["S4"]
     for scenario in reserved:
         assert scenario["status"] == "reserved"
         assert scenario["history_samples"] == scenario["current_samples"] == []
@@ -289,3 +290,196 @@ def test_s2_inclusive_window_and_event_order(event_time, expected):
     next(s for s in scenario["current_samples"] if s["reach_id"] == "reach-b")["event_time"] = (
         f"2026-11-02T{event_time}+08:00")
     assert by_source(analyze_attribution(scenario))["reach-b"]["status"] == expected
+
+
+
+def load_scenario(scenario_id):
+    path = Path(__file__).resolve().parents[1] / "data/trace_scenarios.json"
+    return next(s for s in json.loads(path.read_text(encoding="utf-8"))["scenarios"]
+                if s["scenario_id"] == scenario_id)
+
+
+def test_multi_candidate_s3():
+    report = analyze_attribution(load_scenario("S3"))
+    candidates = by_source(report)
+    assert report["status"] == "MULTI_CANDIDATE"
+    assert "来源未定" in report["conclusion"]
+    assert report["independent_sources"] == ["reach-c:local", "reach-a"]
+    assert candidates["reach-a"]["status"] == candidates["reach-c:local"]["status"] == "retained"
+    assert candidates["reach-c:local"]["ranking_score"] > candidates["reach-a"]["ranking_score"]
+    assert report["target_anomaly"]["value"] == 40
+    assert report["target_anomaly"]["event_time"] == "2026-11-02T11:00:00+08:00"
+    assert candidates["reach-a"]["event_time"] == "2026-11-02T10:45:00+08:00"
+    assert candidates["reach-a"]["absolute_change"] == 4
+    assert candidates["reach-c:local"]["absolute_change"] == 32
+    assert candidates["reach-a"]["evidence_strength"] == "弱"
+    assert any("目标绝对变化量" in gap for gap in candidates["reach-a"]["evidence_gaps"])
+    assert candidates["reach-c:local"]["evidence_strength"] == "待核实"
+    assert report["propagation_path"] == []
+    assert candidates["reach-a"]["exclude_basis"] == []
+    assert candidates["reach-c:local"]["exclude_basis"] == []
+
+
+def test_s3_manual_provenance_and_evidence_gaps():
+    report = analyze_attribution(load_scenario("S3"))
+    local = by_source(report)["reach-c:local"]
+    record = local["local_evidence"][0]
+    assert record["source"] == "manual"
+    assert record["entered_by"] == "simulated_operator"
+    assert record["verification_status"] == "pending"
+    assert record["evidence_strength"] == "待核实"
+    assert local["score_components"]["local_evidence"] == 0.5
+    assert local["evidence_gaps"]
+    assert any("核实" in gap for gap in report["evidence_gaps"])
+
+
+def test_s3_no_record_no_fabricated_local_support():
+    scenario = load_scenario("S3")
+    scenario["local_records"] = []
+    report = analyze_attribution(scenario)
+    local = by_source(report)["reach-c:local"]
+    assert local["local_evidence"] == []
+    assert local["score_components"]["local_evidence"] == 0
+    assert local["evidence_strength"] == "弱"
+    assert local["evidence_gaps"]
+    assert report["status"] == "UNRESOLVED"
+    assert "单源reach-a" not in report["conclusion"]
+
+
+@pytest.mark.parametrize("change", ["outside_window", "different_metric", "different_reach"])
+def test_s3_unrelated_records_do_not_support_target_local(change):
+    scenario = load_scenario("S3")
+    record = scenario["local_records"][0]
+    if change == "outside_window":
+        record["event_time"] = "2026-11-02T09:00:00+08:00"
+    elif change == "different_metric":
+        record["metric"] = "flow"
+    else:
+        record["reach_id"] = "reach-a"
+    local = by_source(analyze_attribution(scenario))["reach-c:local"]
+    assert local["local_evidence"] == []
+    assert local["evidence_strength"] == "弱"
+
+
+def test_manual_record_requires_entered_by():
+    scenario = load_scenario("S3")
+    del scenario["local_records"][0]["entered_by"]
+    with pytest.raises(ValueError, match="entered_by"):
+        analyze_attribution(scenario)
+
+
+def test_upstream_lost_s5():
+    report = analyze_attribution(load_scenario("S5"))
+    candidates = by_source(report)
+    assert report["status"] == "UNRESOLVED"
+    assert "来源未定" in report["conclusion"]
+    assert "reach-a" in report["conclusion"]
+    assert report["target_anomaly"]["value"] == 30
+    assert report["target_anomaly"]["event_time"] == "2026-11-02T14:30:00+08:00"
+    assert report["data_health"]["reach-a"] == {"status": "missing", "age_minutes": None}
+    assert report["data_health"]["reach-b"] == {"status": "fresh", "age_minutes": 20}
+    assert candidates["reach-a"]["status"] == "not_excluded"
+    assert candidates["reach-a"]["role"] == "missing_evidence"
+    assert candidates["reach-a"]["explanation"] == "未排除（缺证据）"
+    assert candidates["reach-a"]["exclude_basis"] == []
+    assert candidates["reach-a"]["event_time"] is None
+    assert candidates["reach-a"]["absolute_change"] is None
+    assert candidates["reach-a"]["rank"] is None
+    assert candidates["reach-a"]["evidence_gaps"]
+    assert candidates["reach-b"]["status"] == "excluded"
+    assert candidates["reach-b"]["absolute_change"] == 0
+    assert any("无活动异常" in basis for basis in candidates["reach-b"]["exclude_basis"])
+    assert candidates["reach-c:local"]["status"] != "excluded"
+    assert report["propagation_path"] == []
+    assert report["next_checks"][0]["reach_id"] == "reach-a"
+    assert "恢复数据链" in report["next_checks"][0]["action"]
+    assert [check["priority"] for check in report["next_checks"]] == [1, 2, 3]
+
+
+def test_s5_completely_missing_a_remains_unexcluded():
+    scenario = load_scenario("S5")
+    scenario["current_samples"] = [s for s in scenario["current_samples"] if s["reach_id"] != "reach-a"]
+    report = analyze_attribution(scenario)
+    a = by_source(report)["reach-a"]
+    assert report["data_health"]["reach-a"]["status"] == "missing"
+    assert a["event_time"] is None
+    assert a["status"] == "not_excluded"
+    assert a["exclude_basis"] == []
+    assert report["status"] == "UNRESOLVED"
+
+
+def test_s5_stale_values_do_not_change_ranking_or_conclusion():
+    scenario = load_scenario("S5")
+    scenario["attribution_config"]["max_sample_age_minutes"] = 20
+    scenario["current_samples"].append({
+        "reach_id": "reach-a", "metric": "turbidity", "value": 6,
+        "event_time": "2026-11-02T14:11:00+08:00",
+        "received_time": "2026-11-02T14:11:02+08:00", "source": "simulated",
+    })
+    before = analyze_attribution(scenario)
+    next(s for s in scenario["current_samples"] if s["reach_id"] == "reach-a")["value"] = 8000
+    after = analyze_attribution(scenario)
+    assert before["data_health"]["reach-a"] == {"status": "stale", "age_minutes": 24}
+    assert after == before
+
+
+def test_s5_event_time_controls_freshness():
+    scenario = load_scenario("S5")
+    scenario["attribution_config"]["max_sample_age_minutes"] = 20
+    a = {
+        "reach_id": "reach-a", "metric": "turbidity", "value": 6,
+        "event_time": "2026-11-02T14:11:00+08:00",
+        "received_time": "2026-11-02T14:11:02+08:00", "source": "simulated",
+    }
+    scenario["current_samples"].append(a)
+    a["received_time"] = scenario["analysis_time"]
+    assert by_source(analyze_attribution(scenario))["reach-a"]["status"] == "not_excluded"
+    # A fresh normal observation is actual evidence, not missing data.
+    a["event_time"] = "2026-11-02T14:16:00+08:00"
+    report = analyze_attribution(scenario)
+    assert report["data_health"]["reach-a"]["status"] == "fresh"
+    assert by_source(report)["reach-a"]["status"] == "excluded"
+
+
+@pytest.mark.parametrize("scenario_id", ["S3", "S5"])
+def test_s3_s5_deterministic_and_input_unchanged(scenario_id):
+    scenario = load_scenario(scenario_id)
+    original = deepcopy(scenario)
+    report = analyze_attribution(scenario)
+    assert report == analyze_attribution(scenario)
+    assert scenario == original
+    scenario["history_samples"].reverse()
+    scenario["current_samples"].reverse()
+    scenario["local_records"].reverse()
+    assert analyze_attribution(scenario) == report
+    assert rank_candidates(list(reversed(report["candidates"]))) == report["candidates"]
+    scenario["scenario_id"] = "renamed"
+    renamed = analyze_attribution(scenario)
+    renamed["scenario_id"] = scenario_id
+    assert renamed == report
+
+
+@pytest.mark.parametrize("scenario_id", ["S2", "S3", "S5"])
+def test_implemented_outputs_exclusion_and_language_contract(scenario_id):
+    scenario = load_scenario(scenario_id)
+    assert scenario["data_classification"] == "SIMULATED"
+    assert all(s["source"] == "simulated" for s in scenario["history_samples"] + scenario["current_samples"])
+    report = analyze_attribution(scenario)
+    for candidate in report["candidates"]:
+        if candidate["status"] == "excluded":
+            assert candidate["exclude_basis"]
+            assert all(basis.strip() for basis in candidate["exclude_basis"])
+    text = json.dumps(report, ensure_ascii=False, allow_nan=False)
+    assert "A导致C" not in text and "已证明来源" not in text
+    assert "不是概率" in report["ranking_score_meaning"]
+
+
+@pytest.mark.parametrize("scenario_id", ["S3", "S5"])
+def test_s3_s5_cli_in_formal_repository(scenario_id):
+    import subprocess
+    import sys
+    repo = Path(__file__).resolve().parents[1]
+    result = subprocess.run([sys.executable, "-m", "backend.attribution", "--scenario", scenario_id],
+                            cwd=repo, check=True, capture_output=True, text=True)
+    report = json.loads(result.stdout)
+    assert report == analyze_attribution(load_scenario(scenario_id))

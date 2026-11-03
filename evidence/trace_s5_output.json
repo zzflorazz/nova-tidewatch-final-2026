@@ -1,0 +1,215 @@
+{
+  "scenario_id": "S5",
+  "seed": 2026110305,
+  "analysis_time": "2026-11-02T14:35:00+08:00",
+  "data_classification": "SIMULATED",
+  "target_anomaly": {
+    "reach_id": "reach-c",
+    "metric": "turbidity",
+    "value": 30,
+    "event_time": "2026-11-02T14:30:00+08:00",
+    "received_time": "2026-11-02T14:30:02+08:00",
+    "source": "simulated",
+    "sample_count": 9,
+    "median": 8.0,
+    "q1": 7.5,
+    "q3": 8.5,
+    "iqr": 1.0,
+    "effective_iqr": 1.0,
+    "fallback": null,
+    "deviation": 22.0,
+    "absolute_change": 22.0,
+    "deviation_threshold": 3.0,
+    "is_anomaly": true
+  },
+  "candidates": [
+    {
+      "source_id": "reach-c:local",
+      "source_type": "local",
+      "event_time": "2026-11-02T14:30:00+08:00",
+      "time_lag_minutes": null,
+      "propagation_window": null,
+      "absolute_change": 22.0,
+      "topology_distance": 0,
+      "local_evidence": [],
+      "ranking_score": 50.0,
+      "score_components": {
+        "time": 0.0,
+        "absolute_change": 1.0,
+        "topology": 1.0,
+        "local_evidence": 0.0
+      },
+      "evidence_strength": "弱",
+      "status": "retained",
+      "role": "independent_source",
+      "exclude_basis": [],
+      "evidence_gaps": [
+        "缺少独立本地证据，不能确认或排除本地来源。"
+      ],
+      "rank": 1
+    },
+    {
+      "source_id": "reach-a",
+      "source_type": "upstream",
+      "event_time": null,
+      "time_lag_minutes": null,
+      "propagation_window": {
+        "min_minutes": 15,
+        "max_minutes": 35
+      },
+      "absolute_change": null,
+      "topology_distance": 2,
+      "local_evidence": [],
+      "ranking_score": 0.0,
+      "evidence_strength": "缺证据",
+      "status": "not_excluded",
+      "role": "missing_evidence",
+      "exclude_basis": [],
+      "evidence_gaps": [
+        "reach-a 数据缺失或过期，不能把最后一次正常观测用于当前排除。"
+      ],
+      "explanation": "未排除（缺证据）",
+      "data_health": {
+        "status": "missing",
+        "age_minutes": null
+      },
+      "rank": null
+    },
+    {
+      "source_id": "reach-b",
+      "source_type": "upstream",
+      "event_time": "2026-11-02T14:15:00+08:00",
+      "time_lag_minutes": 15.0,
+      "propagation_window": {
+        "min_minutes": 8,
+        "max_minutes": 20
+      },
+      "absolute_change": 0.0,
+      "topology_distance": 1,
+      "local_evidence": [],
+      "ranking_score": 0.0,
+      "score_components": {
+        "time": 0.8333333333333334,
+        "absolute_change": 0.0,
+        "topology": 1.0,
+        "local_evidence": 0.0
+      },
+      "evidence_strength": "不支持",
+      "status": "excluded",
+      "role": "excluded",
+      "exclude_basis": [
+        "该断面按自身中位数与 IQR 计算无活动异常。",
+        "上游与目标相对自身基线的变化方向不一致。"
+      ],
+      "evidence_gaps": [],
+      "rank": null
+    },
+    {
+      "source_id": "reach-b:local",
+      "source_type": "local",
+      "event_time": "2026-11-02T14:15:00+08:00",
+      "time_lag_minutes": null,
+      "propagation_window": null,
+      "absolute_change": 0.0,
+      "topology_distance": 1,
+      "local_evidence": [],
+      "ranking_score": 0.0,
+      "score_components": {
+        "time": 0.0,
+        "absolute_change": 0.0,
+        "topology": 0.5,
+        "local_evidence": 0.0
+      },
+      "evidence_strength": "弱",
+      "status": "needs_review",
+      "role": "local_check",
+      "exclude_basis": [],
+      "evidence_gaps": [
+        "缺少独立本地证据，不能确认或排除本地来源。"
+      ],
+      "rank": null
+    }
+  ],
+  "independent_sources": [
+    "reach-c:local"
+  ],
+  "propagation_path": [],
+  "excluded": [
+    {
+      "source_id": "reach-b",
+      "source_type": "upstream",
+      "event_time": "2026-11-02T14:15:00+08:00",
+      "time_lag_minutes": 15.0,
+      "propagation_window": {
+        "min_minutes": 8,
+        "max_minutes": 20
+      },
+      "absolute_change": 0.0,
+      "topology_distance": 1,
+      "local_evidence": [],
+      "ranking_score": 0.0,
+      "score_components": {
+        "time": 0.8333333333333334,
+        "absolute_change": 0.0,
+        "topology": 1.0,
+        "local_evidence": 0.0
+      },
+      "evidence_strength": "不支持",
+      "status": "excluded",
+      "role": "excluded",
+      "exclude_basis": [
+        "该断面按自身中位数与 IQR 计算无活动异常。",
+        "上游与目标相对自身基线的变化方向不一致。"
+      ],
+      "evidence_gaps": [],
+      "rank": null
+    }
+  ],
+  "conclusion": "来源未定｜关键上游 reach-a 证据缺失",
+  "status": "UNRESOLVED",
+  "evidence_gaps": [
+    "时间先后与幅度衰减仅支持关联，缺少独立采样及水动力验证，不能证明因果来源。",
+    "reach-a 缺测或观测过期，未排除（缺证据）。",
+    "传播路径或本地排除证据不完整，不能沿用完整路径下的单源结论。",
+    "缺少独立本地证据，不能确认或排除本地来源。",
+    "reach-a 数据缺失或过期，不能把最后一次正常观测用于当前排除。"
+  ],
+  "data_health": {
+    "reach-a": {
+      "status": "missing",
+      "age_minutes": null
+    },
+    "reach-b": {
+      "status": "fresh",
+      "age_minutes": 20.0
+    },
+    "reach-c": {
+      "status": "fresh",
+      "age_minutes": 5.0
+    }
+  },
+  "next_checks": [
+    {
+      "priority": 1,
+      "reach_id": "reach-a",
+      "action": "优先恢复数据链并核对缺失时段观测。"
+    },
+    {
+      "priority": 2,
+      "reach_id": "reach-c",
+      "action": "核查附近排口与施工记录，确认来源和录入信息。"
+    },
+    {
+      "priority": 3,
+      "reach_id": "reach-c",
+      "action": "必要时人工采样，补充独立核验依据。"
+    }
+  ],
+  "ranking_weights": {
+    "time": 30.0,
+    "absolute_change": 40.0,
+    "topology": 10.0,
+    "local_evidence": 20.0
+  },
+  "ranking_score_meaning": "相对排序分，不是概率"
+}
