@@ -1,0 +1,15 @@
+commit c39251bb956d066d9aa3126f84327b7771430630
+Author:     萧逸 <xiaoyi@xiaoyideMacBook-Air.local>
+AuthorDate: Tue Nov 3 18:44:40 2026 +0800
+Commit:     trae-solo-agent <solo-agent@trae.ai>
+CommitDate: Tue Nov 3 18:44:40 2026 +0800
+
+    feat: 完善S3多候选与S5缺失证据归因
+
+ backend/attribution.py               | 150 +++++++--
+ data/trace_scenarios.json            | 592 ++++++++++++++++++++++++++++++++++-
+ evidence/trace_s3_output.json        | 227 ++++++++++++++
+ evidence/trace_s3_s5_test_output.txt |  11 +
+ evidence/trace_s5_output.json        | 215 +++++++++++++
+ tests/test_trace.py                  | 198 +++++++++++-
+ 6 files changed, 1355 insertions(+), 38 deletions(-)
