@@ -134,17 +134,13 @@ def test_analysis_snapshot_and_history_separation():
         analyze_scenario(scenario)
 
 
-def test_other_scenarios_are_reserved():
+def test_s4_subscenarios_are_implemented():
     path = Path(__file__).resolve().parents[1] / "data/trace_scenarios.json"
-    reserved = [s for s in json.loads(path.read_text(encoding="utf-8"))["scenarios"]
-                if s["scenario_id"] == "S4"]
-    assert [s["scenario_id"] for s in reserved] == ["S4"]
-    for scenario in reserved:
-        assert scenario["status"] == "reserved"
-        assert scenario["history_samples"] == scenario["current_samples"] == []
-        with pytest.raises(ValueError, match="reserved"):
-            analyze_scenario(scenario)
-
+    scenarios = json.loads(path.read_text(encoding="utf-8"))["scenarios"]
+    children = [s for s in scenarios if s["scenario_id"].startswith("S4")]
+    assert [s["scenario_id"] for s in children] == ["S4a", "S4b"]
+    assert all(s["status"] == "implemented" for s in children)
+    assert all(s["history_samples"] and s["current_samples"] for s in children)
 
 
 def load_s2():
@@ -483,3 +479,165 @@ def test_s3_s5_cli_in_formal_repository(scenario_id):
                             cwd=repo, check=True, capture_output=True, text=True)
     report = json.loads(result.stdout)
     assert report == analyze_attribution(load_scenario(scenario_id))
+
+
+
+def test_same_pattern_diff_source_s4():
+    a = analyze_attribution(load_scenario("S4a"))
+    b = analyze_attribution(load_scenario("S4b"))
+    assert a["independent_sources"] == ["reach-a"]
+    assert b["independent_sources"] == ["reach-c:local"]
+    assert a["conclusion"] != b["conclusion"]
+    assert a["status"] == "SUPPORTED_SINGLE"
+    assert b["status"] == "SUPPORTED_LOCAL"
+    for result, value, change in [(a, 27, 19), (b, 26, 18)]:
+        target = result["target_anomaly"]
+        assert (target["reach_id"], target["metric"]) == ("reach-c", "turbidity")
+        assert target["value"] == value
+        assert target["median"] == 8
+        assert target["absolute_change"] == change
+    assert abs(a["target_anomaly"]["absolute_change"] - b["target_anomaly"]["absolute_change"]) == 1
+
+
+def test_s4a_upstream_evidence_chain():
+    scenario = load_scenario("S4a")
+    assert scenario["local_records"] == []
+    report = analyze_attribution(scenario)
+    candidates = by_source(report)
+    a, b, local = (candidates[k] for k in ["reach-a", "reach-b", "reach-c:local"])
+    assert a["rank"] == 1 and a["evidence_strength"] == "强"
+    assert a["absolute_change"] == 18
+    assert a["time_lag_minutes"] == 25
+    assert b["absolute_change"] == 10 and b["time_lag_minutes"] == 13
+    assert b["status"] == "propagation" and b["rank"] is None
+    assert a["event_time"] < b["event_time"] < report["target_anomaly"]["event_time"]
+    assert a["evidence_basis"]
+    assert local["status"] == "excluded" and local["exclude_basis"]
+    assert any("噪声容差" in basis for basis in local["exclude_basis"])
+    assert "强证据" in report["conclusion"]
+
+
+def test_s4b_local_combined_evidence():
+    scenario = load_scenario("S4b")
+    report = analyze_attribution(scenario)
+    candidates = by_source(report)
+    local = candidates["reach-c:local"]
+    assert local["rank"] == 1 and local["evidence_strength"] == "中等"
+    assert local["evidence_basis"] and local["evidence_gaps"]
+    record = local["local_evidence"][0]
+    assert record["source"] == "manual"
+    assert record["verification_status"] == "pending"
+    assert record["evidence_strength"] == "待核实"
+    assert record["entered_by"]
+    for reach in ["reach-a", "reach-b"]:
+        assert candidates[reach]["absolute_change"] == 1
+        assert candidates[reach]["status"] == "excluded"
+        assert any("无活动异常" in basis for basis in candidates[reach]["exclude_basis"])
+    assert "中等证据" in report["conclusion"]
+    assert "仍待核实" in report["conclusion"]
+
+
+@pytest.mark.parametrize("scenario_id, values", [("S4a", [24, 15, 27]), ("S4b", [7, 6, 26])])
+def test_s4_sample_contract_and_real_baselines(scenario_id, values):
+    from datetime import datetime
+    scenario = load_scenario(scenario_id)
+    report = analyze_scenario(scenario)
+    assert [r["value"] for r in report["results"]] == values
+    assert [r["median"] for r in report["results"]] == [6, 5, 8]
+    assert [r["iqr"] for r in report["results"]] == [1, 1, 1]
+    assert all(r["fallback"] is None for r in report["results"])
+    assert scenario["data_classification"] == "SIMULATED"
+    cutoff = datetime.fromisoformat(scenario["analysis_time"])
+    for current in scenario["current_samples"]:
+        history = [s for s in scenario["history_samples"] if s["reach_id"] == current["reach_id"]]
+        assert len(history) == 9
+        assert all(datetime.fromisoformat(s["event_time"]) < datetime.fromisoformat(current["event_time"])
+                   for s in history)
+        age = (cutoff - datetime.fromisoformat(current["event_time"])).total_seconds() / 60
+        assert age <= scenario["attribution_config"]["max_sample_age_minutes"]
+    for sample in scenario["history_samples"] + scenario["current_samples"]:
+        assert sample["source"] == "simulated"
+        assert {"reach_id", "metric", "value", "event_time", "received_time", "source"} <= sample.keys()
+        assert datetime.fromisoformat(sample["event_time"]) <= datetime.fromisoformat(sample["received_time"]) <= cutoff
+
+
+@pytest.mark.parametrize("scenario_id", ["S4a", "S4b"])
+def test_s4_deterministic_exclusion_and_name_independence(scenario_id):
+    scenario = load_scenario(scenario_id)
+    original = deepcopy(scenario)
+    expected = analyze_attribution(scenario)
+    assert scenario == original
+    assert expected == analyze_attribution(scenario)
+    scenario["history_samples"].reverse()
+    scenario["current_samples"].reverse()
+    scenario["local_records"].reverse()
+    assert analyze_attribution(scenario) == expected
+    scenario["scenario_id"] = "unrelated-name"
+    scenario["name"] = "misleading name"
+    actual = analyze_attribution(scenario)
+    actual["scenario_id"] = scenario_id
+    assert actual == expected
+    for c in actual["candidates"]:
+        if c["status"] == "excluded":
+            assert c["exclude_basis"] and all(b.strip() for b in c["exclude_basis"])
+    assert "A导致C" not in json.dumps(actual, ensure_ascii=False)
+    assert "已证明来源" not in json.dumps(actual, ensure_ascii=False)
+
+
+def test_s4b_record_alone_cannot_retain_medium_evidence():
+    scenario = load_scenario("S4b")
+    for sample, value in zip(scenario["current_samples"], [24, 15, 26]):
+        sample["value"] = value
+    report = analyze_attribution(scenario)
+    assert report["status"] != "SUPPORTED_LOCAL"
+    assert by_source(report)["reach-c:local"]["evidence_strength"] == "待核实"
+    assert report["status"] == "MULTI_CANDIDATE"
+
+
+def test_s4b_without_record_cannot_confirm_local():
+    scenario = load_scenario("S4b")
+    scenario["local_records"] = []
+    report = analyze_attribution(scenario)
+    assert report["status"] == "UNRESOLVED"
+    assert by_source(report)["reach-c:local"]["evidence_strength"] == "弱"
+
+
+def test_s4_source_envelope_is_bounded_by_measured_noise():
+    scenario = load_scenario("S4a")
+    next(s for s in scenario["current_samples"] if s["reach_id"] == "reach-c")["value"] = 29
+    report = analyze_attribution(scenario)
+    assert report["status"] != "SUPPORTED_SINGLE"
+    assert report["propagation_path"] == []
+    assert by_source(report)["reach-a"]["evidence_strength"] != "强"
+
+
+def test_s4_invalid_time_cannot_support_upstream_path():
+    scenario = load_scenario("S4a")
+    next(s for s in scenario["current_samples"] if s["reach_id"] == "reach-b")["event_time"] = (
+        "2026-11-02T10:19:00+08:00")
+    report = analyze_attribution(scenario)
+    assert report["status"] != "SUPPORTED_SINGLE"
+    assert by_source(report)["reach-b"]["status"] == "excluded"
+    assert report["propagation_path"] == []
+
+
+def test_s4_missing_upstream_cannot_confirm_local():
+    scenario = load_scenario("S4b")
+    scenario["current_samples"] = [s for s in scenario["current_samples"] if s["reach_id"] != "reach-a"]
+    report = analyze_attribution(scenario)
+    assert report["status"] == "UNRESOLVED"
+    assert by_source(report)["reach-c:local"]["evidence_strength"] != "中等"
+
+
+def test_s4_same_config_distinguishes_evidence_not_label():
+    a, b = load_scenario("S4a"), load_scenario("S4b")
+    assert a["attribution_config"] == b["attribution_config"]
+    assert a["baseline_config"] == b["baseline_config"]
+    assert a["propagation_windows"] == b["propagation_windows"]
+    b["local_records"] = []
+    for sample, value in zip(b["current_samples"], [24, 15, 27]):
+        sample["value"] = value
+    result = analyze_attribution(b)
+    assert result["status"] == "SUPPORTED_SINGLE"
+    assert result["independent_sources"] == ["reach-a"]
+    assert by_source(result)["reach-a"]["evidence_strength"] == "强"

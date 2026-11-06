@@ -1100,13 +1100,606 @@
       ]
     },
     {
-      "scenario_id": "S4",
-      "seed": null,
-      "analysis_time": null,
+      "scenario_id": "S4a",
+      "seed": 2026110601,
+      "analysis_time": "2026-11-02T10:21:00+08:00",
       "data_classification": "SIMULATED",
-      "status": "reserved",
-      "history_samples": [],
-      "current_samples": []
+      "status": "implemented",
+      "description": "同现象不同来源：固定教学模拟对照。",
+      "topology": [
+        "reach-a",
+        "reach-b",
+        "reach-c"
+      ],
+      "propagation_windows": {
+        "reach-a->reach-b": [
+          5,
+          20
+        ],
+        "reach-b->reach-c": [
+          8,
+          20
+        ],
+        "reach-a->reach-c": [
+          15,
+          35
+        ]
+      },
+      "target": {
+        "reach_id": "reach-c",
+        "metric": "turbidity",
+        "event_time": "2026-11-02T10:20:00+08:00"
+      },
+      "baseline_config": {
+        "turbidity": {
+          "deviation_threshold": 3.0,
+          "min_noise": 0.01
+        }
+      },
+      "attribution_config": {
+        "ranking_weights": {
+          "time": 30.0,
+          "absolute_change": 40.0,
+          "topology": 10.0,
+          "local_evidence": 20.0
+        },
+        "max_sample_age_minutes": 30,
+        "local_evidence_window_minutes": 35,
+        "propagation_model": "source_envelope",
+        "source_envelope_tolerance_iqr": 1.0
+      },
+      "local_records": [],
+      "history_samples": [
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 5.0,
+          "event_time": "2026-11-02T09:00:00+08:00",
+          "received_time": "2026-11-02T09:00:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 5.5,
+          "event_time": "2026-11-02T09:05:00+08:00",
+          "received_time": "2026-11-02T09:05:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.0,
+          "event_time": "2026-11-02T09:10:00+08:00",
+          "received_time": "2026-11-02T09:10:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.5,
+          "event_time": "2026-11-02T09:15:00+08:00",
+          "received_time": "2026-11-02T09:15:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 7.0,
+          "event_time": "2026-11-02T09:20:00+08:00",
+          "received_time": "2026-11-02T09:20:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 5.5,
+          "event_time": "2026-11-02T09:25:00+08:00",
+          "received_time": "2026-11-02T09:25:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.0,
+          "event_time": "2026-11-02T09:30:00+08:00",
+          "received_time": "2026-11-02T09:30:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.5,
+          "event_time": "2026-11-02T09:35:00+08:00",
+          "received_time": "2026-11-02T09:35:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.0,
+          "event_time": "2026-11-02T09:40:00+08:00",
+          "received_time": "2026-11-02T09:40:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 4.0,
+          "event_time": "2026-11-02T09:00:00+08:00",
+          "received_time": "2026-11-02T09:00:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 4.5,
+          "event_time": "2026-11-02T09:05:00+08:00",
+          "received_time": "2026-11-02T09:05:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 5.0,
+          "event_time": "2026-11-02T09:10:00+08:00",
+          "received_time": "2026-11-02T09:10:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 5.5,
+          "event_time": "2026-11-02T09:15:00+08:00",
+          "received_time": "2026-11-02T09:15:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 6.0,
+          "event_time": "2026-11-02T09:20:00+08:00",
+          "received_time": "2026-11-02T09:20:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 4.5,
+          "event_time": "2026-11-02T09:25:00+08:00",
+          "received_time": "2026-11-02T09:25:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 5.0,
+          "event_time": "2026-11-02T09:30:00+08:00",
+          "received_time": "2026-11-02T09:30:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 5.5,
+          "event_time": "2026-11-02T09:35:00+08:00",
+          "received_time": "2026-11-02T09:35:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 5.0,
+          "event_time": "2026-11-02T09:40:00+08:00",
+          "received_time": "2026-11-02T09:40:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 7.0,
+          "event_time": "2026-11-02T09:00:00+08:00",
+          "received_time": "2026-11-02T09:00:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 7.5,
+          "event_time": "2026-11-02T09:05:00+08:00",
+          "received_time": "2026-11-02T09:05:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 8.0,
+          "event_time": "2026-11-02T09:10:00+08:00",
+          "received_time": "2026-11-02T09:10:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 8.5,
+          "event_time": "2026-11-02T09:15:00+08:00",
+          "received_time": "2026-11-02T09:15:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 9.0,
+          "event_time": "2026-11-02T09:20:00+08:00",
+          "received_time": "2026-11-02T09:20:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 7.5,
+          "event_time": "2026-11-02T09:25:00+08:00",
+          "received_time": "2026-11-02T09:25:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 8.0,
+          "event_time": "2026-11-02T09:30:00+08:00",
+          "received_time": "2026-11-02T09:30:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 8.5,
+          "event_time": "2026-11-02T09:35:00+08:00",
+          "received_time": "2026-11-02T09:35:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 8.0,
+          "event_time": "2026-11-02T09:40:00+08:00",
+          "received_time": "2026-11-02T09:40:02+08:00",
+          "source": "simulated"
+        }
+      ],
+      "current_samples": [
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 24,
+          "event_time": "2026-11-02T09:55:00+08:00",
+          "received_time": "2026-11-02T09:55:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 15,
+          "event_time": "2026-11-02T10:07:00+08:00",
+          "received_time": "2026-11-02T10:07:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 27,
+          "event_time": "2026-11-02T10:20:00+08:00",
+          "received_time": "2026-11-02T10:20:02+08:00",
+          "source": "simulated"
+        }
+      ]
+    },
+    {
+      "scenario_id": "S4b",
+      "seed": 2026110602,
+      "analysis_time": "2026-11-02T16:41:00+08:00",
+      "data_classification": "SIMULATED",
+      "status": "implemented",
+      "description": "同现象不同来源：固定教学模拟对照。",
+      "topology": [
+        "reach-a",
+        "reach-b",
+        "reach-c"
+      ],
+      "propagation_windows": {
+        "reach-a->reach-b": [
+          5,
+          20
+        ],
+        "reach-b->reach-c": [
+          8,
+          20
+        ],
+        "reach-a->reach-c": [
+          15,
+          35
+        ]
+      },
+      "target": {
+        "reach_id": "reach-c",
+        "metric": "turbidity",
+        "event_time": "2026-11-02T16:40:00+08:00"
+      },
+      "baseline_config": {
+        "turbidity": {
+          "deviation_threshold": 3.0,
+          "min_noise": 0.01
+        }
+      },
+      "attribution_config": {
+        "ranking_weights": {
+          "time": 30.0,
+          "absolute_change": 40.0,
+          "topology": 10.0,
+          "local_evidence": 20.0
+        },
+        "max_sample_age_minutes": 30,
+        "local_evidence_window_minutes": 35,
+        "propagation_model": "source_envelope",
+        "source_envelope_tolerance_iqr": 1.0
+      },
+      "local_records": [
+        {
+          "record_id": "s4-local-construction",
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "event_time": "2026-11-02T16:30:00+08:00",
+          "source": "manual",
+          "entered_by": "simulated_operator",
+          "verification_status": "pending",
+          "data_classification": "SIMULATED",
+          "description": "教学模拟：C 附近施工记录，待现场核实。"
+        }
+      ],
+      "history_samples": [
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 5.0,
+          "event_time": "2026-11-02T15:20:00+08:00",
+          "received_time": "2026-11-02T15:20:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 5.5,
+          "event_time": "2026-11-02T15:25:00+08:00",
+          "received_time": "2026-11-02T15:25:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.0,
+          "event_time": "2026-11-02T15:30:00+08:00",
+          "received_time": "2026-11-02T15:30:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.5,
+          "event_time": "2026-11-02T15:35:00+08:00",
+          "received_time": "2026-11-02T15:35:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 7.0,
+          "event_time": "2026-11-02T15:40:00+08:00",
+          "received_time": "2026-11-02T15:40:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 5.5,
+          "event_time": "2026-11-02T15:45:00+08:00",
+          "received_time": "2026-11-02T15:45:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.0,
+          "event_time": "2026-11-02T15:50:00+08:00",
+          "received_time": "2026-11-02T15:50:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.5,
+          "event_time": "2026-11-02T15:55:00+08:00",
+          "received_time": "2026-11-02T15:55:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 6.0,
+          "event_time": "2026-11-02T16:00:00+08:00",
+          "received_time": "2026-11-02T16:00:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 4.0,
+          "event_time": "2026-11-02T15:20:00+08:00",
+          "received_time": "2026-11-02T15:20:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 4.5,
+          "event_time": "2026-11-02T15:25:00+08:00",
+          "received_time": "2026-11-02T15:25:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 5.0,
+          "event_time": "2026-11-02T15:30:00+08:00",
+          "received_time": "2026-11-02T15:30:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 5.5,
+          "event_time": "2026-11-02T15:35:00+08:00",
+          "received_time": "2026-11-02T15:35:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 6.0,
+          "event_time": "2026-11-02T15:40:00+08:00",
+          "received_time": "2026-11-02T15:40:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 4.5,
+          "event_time": "2026-11-02T15:45:00+08:00",
+          "received_time": "2026-11-02T15:45:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 5.0,
+          "event_time": "2026-11-02T15:50:00+08:00",
+          "received_time": "2026-11-02T15:50:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 5.5,
+          "event_time": "2026-11-02T15:55:00+08:00",
+          "received_time": "2026-11-02T15:55:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 5.0,
+          "event_time": "2026-11-02T16:00:00+08:00",
+          "received_time": "2026-11-02T16:00:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 7.0,
+          "event_time": "2026-11-02T15:20:00+08:00",
+          "received_time": "2026-11-02T15:20:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 7.5,
+          "event_time": "2026-11-02T15:25:00+08:00",
+          "received_time": "2026-11-02T15:25:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 8.0,
+          "event_time": "2026-11-02T15:30:00+08:00",
+          "received_time": "2026-11-02T15:30:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 8.5,
+          "event_time": "2026-11-02T15:35:00+08:00",
+          "received_time": "2026-11-02T15:35:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 9.0,
+          "event_time": "2026-11-02T15:40:00+08:00",
+          "received_time": "2026-11-02T15:40:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 7.5,
+          "event_time": "2026-11-02T15:45:00+08:00",
+          "received_time": "2026-11-02T15:45:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 8.0,
+          "event_time": "2026-11-02T15:50:00+08:00",
+          "received_time": "2026-11-02T15:50:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 8.5,
+          "event_time": "2026-11-02T15:55:00+08:00",
+          "received_time": "2026-11-02T15:55:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 8.0,
+          "event_time": "2026-11-02T16:00:00+08:00",
+          "received_time": "2026-11-02T16:00:02+08:00",
+          "source": "simulated"
+        }
+      ],
+      "current_samples": [
+        {
+          "reach_id": "reach-a",
+          "metric": "turbidity",
+          "value": 7,
+          "event_time": "2026-11-02T16:15:00+08:00",
+          "received_time": "2026-11-02T16:15:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-b",
+          "metric": "turbidity",
+          "value": 6,
+          "event_time": "2026-11-02T16:27:00+08:00",
+          "received_time": "2026-11-02T16:27:02+08:00",
+          "source": "simulated"
+        },
+        {
+          "reach_id": "reach-c",
+          "metric": "turbidity",
+          "value": 26,
+          "event_time": "2026-11-02T16:40:00+08:00",
+          "received_time": "2026-11-02T16:40:02+08:00",
+          "source": "simulated"
+        }
+      ]
     },
     {
       "scenario_id": "S5",

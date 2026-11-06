@@ -5,7 +5,11 @@ Windows are inclusive event-time minutes. Scores sum configured weights times:
 window midpoint fit (0..1), absolute change / largest observed absolute change,
 1 / topology distance, and presence of local evidence. Scores are relative
 ordering scores, never probabilities. Only independent, eligible sources rank.
-A checked path can support medium evidence, never a proven causal source.
+Default paths require stepwise amplitude decay and support medium evidence.
+The optional source_envelope model compares each downstream change against
+its origin plus a configured number of measured IQRs. A complete three-reach
+path supports strong associative evidence; fresh normal upstream observations
+plus local side evidence support medium local evidence, never causal proof.
 """
 
 import argparse
@@ -89,6 +93,18 @@ def analyze_attribution(scenario):
     ) or sum(weights.values()) == 0:
         raise ValueError('Ranking weights must be finite nonnegative values with positive sum')
     settings = scenario['attribution_config']
+    model = settings.get('propagation_model', 'stepwise_decay')
+    tolerance_iqr = settings.get('source_envelope_tolerance_iqr', 0.0)
+    if model not in ('stepwise_decay', 'source_envelope'):
+        raise ValueError('Unknown propagation_model')
+    if (isinstance(tolerance_iqr, bool) or not isinstance(tolerance_iqr, (int, float))
+            or not math.isfinite(tolerance_iqr) or tolerance_iqr < 0):
+        raise ValueError('source_envelope_tolerance_iqr must be finite and nonnegative')
+
+    def envelope_limit(origin, downstream):
+        return origin['absolute_change'] + tolerance_iqr * max(
+            origin['effective_iqr'], downstream['effective_iqr'])
+
     cutoff = _time(scenario['analysis_time'])
     max_age = settings.get('max_sample_age_minutes')
     local_window = settings.get('local_evidence_window_minutes', 35)
@@ -199,7 +215,8 @@ def analyze_attribution(scenario):
         for left, right in zip(segment, segment[1:]):
             a, b = observations[left], observations[right]
             if (not _within(_lag(a, b), _window(scenario, left, right))
-                    or a['absolute_change'] < b['absolute_change']
+                    or (b['absolute_change'] > envelope_limit(observations[origin_reach], b)
+                        if model == 'source_envelope' else a['absolute_change'] < b['absolute_change'])
                     or a['deviation'] * b['deviation'] <= 0):
                 valid = False
         if valid and not any(evidence(r) for r in segment[1:]):
@@ -207,7 +224,17 @@ def analyze_attribution(scenario):
     # The earliest topological origin of a checked path absorbs intermediate reaches.
     path = paths[0] if paths else []
     if path:
-        upstream[path[0]]['evidence_strength'] = '中等'
+        upstream[path[0]]['evidence_strength'] = (
+            '强' if model == 'source_envelope' and len(path) == len(chain) and len(path) >= 3 else '中等')
+        if model == 'source_envelope':
+            origin = observations[path[0]]
+            upstream[path[0]]['evidence_basis'] = [
+                '全链各断面按自身基线异常、方向一致，且逐段与直达目标的事件时间均符合配置传播窗口。',
+                f"源头绝对变化量 {origin['absolute_change']:g}，目标 {target['absolute_change']:g}；"
+                f"目标未超过源头幅度加 {tolerance_iqr:g} 个实测 IQR 的上界 "
+                f"{envelope_limit(origin, target):g}；该规则允许中间断面衰减后回升。",
+                '没有独立本地记录支持其他来源；强证据仍不等于因果证明。',
+            ]
         for reach in path[1:-1]:
             item = upstream[reach]
             item.update(role='propagation_path', status='propagation', ranking_score=0.0,
@@ -234,6 +261,15 @@ def analyze_attribution(scenario):
                      f"{observations[reach]['absolute_change']:g} 未放大。",
                      '本次固定模拟输入的 local_records 中无该断面独立本地记录；'
                      '仅在本场景证据范围内排除，不代表现实中不存在本地源。']
+        if supported and model == 'source_envelope':
+            origin = observations[path[0]]
+            basis = [
+                f'{predecessor}→{reach} 拓扑成立，事件时间差 {lag:g} 分钟符合传播窗口。',
+                f"{reach} 绝对变化量 {observations[reach]['absolute_change']:g} 未超过源头 "
+                f"{path[0]} 变化量 {origin['absolute_change']:g} 加实测 IQR 噪声容差的上界 "
+                f"{envelope_limit(origin, observations[reach]):g}。",
+                '固定模拟输入中无独立本地记录；仅在本场景证据范围内排除。',
+            ]
         is_source = not supported and (bool(local) or reach == chain[-1])
         record_lag = min(((_time(target['event_time']) - _time(r['event_time'])).total_seconds() / 60
                           for r in local), default=None)
@@ -264,12 +300,27 @@ def analyze_attribution(scenario):
             'role': 'independent_source' if is_source else 'local_check',
             'exclude_basis': basis, 'evidence_gaps': local_gaps,
         })
+    # A pending record remains pending; a medium candidate requires separate
+    # fresh, normal upstream observations as well as the computed target anomaly.
+    local_supported = (model == 'source_envelope' and bool(chain[:-1]) and not missing
+                       and all(not observations[r]['is_anomaly'] for r in chain[:-1]))
+    for candidate in candidates:
+        if (local_supported and candidate['source_id'] == f"{chain[-1]}:local"
+                and candidate['status'] == 'retained' and candidate['local_evidence']):
+            candidate['evidence_strength'] = '中等'
+            candidate['evidence_basis'] = [
+                '全部上游断面数据新鲜，按各自中位数/IQR 无活动异常，而目标断面存在活动异常。',
+                '目标附近有时间窗口内的本地记录；组合证据支持本地候选，施工记录本身仍待核实。',
+            ]
     candidates = rank_candidates(candidates)
     sources = [c for c in candidates if c['rank'] is not None]
     gaps = ['时间先后与幅度衰减仅支持关联，缺少独立采样及水动力验证，不能证明因果来源。']
     complete = (not missing and bool(path) and len(sources) == 1
                 and sources[0]['source_id'] == path[0]
                 and all(c['status'] == 'excluded' for c in candidates if c['source_type'] == 'local'))
+    local_complete = (local_supported and len(sources) == 1
+                      and sources[0]['source_type'] == 'local' and bool(sources[0]['local_evidence']))
+    complete = complete or local_complete
     checks = []
     if missing:
         state = 'UNRESOLVED'
@@ -278,8 +329,10 @@ def analyze_attribution(scenario):
         checks.extend({'priority': i + 1, 'reach_id': reach, 'action': '优先恢复数据链并核对缺失时段观测。'}
                       for i, reach in enumerate(missing))
     elif complete:
-        state = 'SUPPORTED_SINGLE'
-        conclusion = f"证据支持单源{sources[0]['source_id']}（中等证据；非因果证明）"
+        state = 'SUPPORTED_LOCAL' if local_complete else 'SUPPORTED_SINGLE'
+        strength = sources[0]['evidence_strength']
+        conclusion = (f"证据支持本地来源{sources[0]['source_id']}（{strength}证据；施工记录仍待核实，非因果证明）"
+                      if local_complete else f"证据支持单源{sources[0]['source_id']}（{strength}证据；非因果证明）")
     elif len(sources) >= 2 and any(c['local_evidence'] for c in sources if c['source_type'] == 'local'):
         state = 'MULTI_CANDIDATE'
         conclusion = '多源候选，来源未定；按相对证据排序保留 ' + '、'.join(c['source_id'] for c in sources)
