@@ -40,9 +40,15 @@ def run_attribution(scenario: dict, store: TraceStore, run_id: str | None = None
     store.start_run(run_id, scenario.get("scenario_id"), anomaly_id)
     try:
         for sample in scenario["history_samples"]:
-            store.insert_sample(sample, anomaly_id=anomaly_id)
+            if not store.sample_exists(
+                sample["reach_id"], sample["metric"], sample["event_time"], sample["value"]
+            ):
+                store.insert_sample(sample, anomaly_id=anomaly_id)
         for sample in scenario["current_samples"]:
-            store.insert_sample(sample, anomaly_id=anomaly_id)
+            if not store.sample_exists(
+                sample["reach_id"], sample["metric"], sample["event_time"], sample["value"]
+            ):
+                store.insert_sample(sample, anomaly_id=anomaly_id)
 
         output = analyze_attribution(scenario)
         input_snapshot = {

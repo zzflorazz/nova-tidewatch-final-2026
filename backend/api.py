@@ -1,0 +1,174 @@
+"""TideWatch Trace workbench queries and versioned attribution operations."""
+
+import json
+from contextlib import asynccontextmanager
+from copy import deepcopy
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+from .store import TraceStore
+from .trace_runner import run_attribution
+
+
+DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "trace_scenarios.json"
+DEFAULT_DB_PATH = Path(__file__).resolve().parents[1] / "data" / "trace.db"
+
+
+class RunRequest(BaseModel):
+    scenario_id: str
+
+
+class LateSampleRequest(BaseModel):
+    scenario_id: str
+    sample: dict
+
+
+def load_scenarios() -> list[dict]:
+    return json.loads(DATA_PATH.read_text(encoding="utf-8"))["scenarios"]
+
+
+def find_scenario(scenario_id: str) -> dict | None:
+    return next((s for s in load_scenarios() if s["scenario_id"] == scenario_id), None)
+
+
+def create_app(db_path: str | None = None) -> FastAPI:
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        # Own the SQLite connection in the same thread as the async routes.
+        store = TraceStore(db_path or str(DEFAULT_DB_PATH))
+        try:
+            store.init_schema()
+            app.state.store = store
+            yield
+        finally:
+            store.close()
+
+    app = FastAPI(title="TideWatch Trace API", version="1.0.0", lifespan=lifespan)
+
+    def require_anomaly(anomaly_id: str) -> dict:
+        anomaly = app.state.store.get_anomaly(anomaly_id)
+        if anomaly is None:
+            raise HTTPException(status_code=404, detail=f"未找到异常：{anomaly_id}")
+        return anomaly
+
+    def require_runnable_scenario(scenario_id: str) -> dict:
+        scenario = find_scenario(scenario_id)
+        if scenario is None:
+            raise HTTPException(status_code=404, detail=f"未找到场景：{scenario_id}")
+        if scenario.get("status") != "implemented":
+            raise HTTPException(status_code=400, detail=f"场景尚未实现：{scenario_id}")
+        if not scenario.get("target"):
+            raise HTTPException(status_code=400, detail=f"场景没有目标异常，无法运行归因：{scenario_id}")
+        return scenario
+
+    @app.get("/api/health")
+    async def health():
+        return {"status": "ok", "data_classification": "SIMULATED"}
+
+    @app.get("/api/scenarios")
+    async def list_scenarios():
+        return [
+            {key: scenario.get(key) for key in ("scenario_id", "status", "analysis_time", "target")}
+            for scenario in load_scenarios()
+        ]
+
+    @app.get("/api/scenarios/{scenario_id}")
+    async def get_scenario(scenario_id: str):
+        scenario = find_scenario(scenario_id)
+        if scenario is None:
+            raise HTTPException(status_code=404, detail=f"未找到场景：{scenario_id}")
+        return scenario
+
+    @app.get("/api/anomalies")
+    async def list_anomalies():
+        return [
+            {**anomaly, "latest_version": anomaly["current_version"] - 1}
+            for anomaly in app.state.store.list_anomalies()
+        ]
+
+    @app.get("/api/anomalies/{anomaly_id}")
+    async def get_anomaly(anomaly_id: str):
+        anomaly = require_anomaly(anomaly_id)
+        return {"anomaly": anomaly, "latest_version": anomaly["current_version"] - 1}
+
+    @app.get("/api/anomalies/{anomaly_id}/attributions")
+    async def list_attributions(anomaly_id: str):
+        require_anomaly(anomaly_id)
+        return [
+            {key: row[key] for key in (
+                "version", "status", "conclusion", "run_id", "analysis_time", "created_at"
+            )}
+            for row in app.state.store.list_attributions(anomaly_id)
+        ]
+
+    @app.get("/api/anomalies/{anomaly_id}/attributions/{version}")
+    async def get_attribution(anomaly_id: str, version: int):
+        require_anomaly(anomaly_id)
+        attribution = app.state.store.get_attribution(anomaly_id, version)
+        if attribution is None:
+            raise HTTPException(status_code=404, detail=f"未找到归因版本：{version}")
+        return attribution
+
+    @app.get("/api/anomalies/{anomaly_id}/evidence")
+    async def get_evidence(anomaly_id: str, version: int | None = None):
+        anomaly = require_anomaly(anomaly_id)
+        store = app.state.store
+        attribution = store.get_attribution(anomaly_id, version)
+        if attribution is None:
+            detail = "该异常暂无归因版本" if version is None else f"未找到归因版本：{version}"
+            raise HTTPException(status_code=404, detail=detail)
+        output = attribution["output_json"]
+        snapshot = attribution["input_snapshot"]
+        return {
+            "anomaly": anomaly,
+            "version": attribution["version"],
+            "versions": [
+                {key: row[key] for key in ("version", "status", "conclusion", "run_id", "created_at")}
+                for row in store.list_attributions(anomaly_id)
+            ],
+            "run": store.get_run(attribution["run_id"]),
+            "input_summary": {
+                "history_sample_count": len(snapshot.get("history_samples", [])),
+                "current_sample_count": len(snapshot.get("current_samples", [])),
+                "target": snapshot.get("target", {}),
+            },
+            "output": output,
+            "candidates": [c for c in output.get("candidates", [])
+                           if c.get("role") == "independent_source" and c.get("status") == "retained"],
+            "excluded": output.get("excluded", []),
+            "propagation_path": output.get("propagation_path", []),
+            "evidence_gaps": output.get("evidence_gaps", []),
+            "next_checks": output.get("next_checks", []),
+            "ranking_score_meaning": output.get("ranking_score_meaning", ""),
+            "data_classification": output.get("data_classification", ""),
+            "note": "候选排序分为相对分，不代表因果概率；排除仅限本场景证据范围。",
+        }
+
+    @app.post("/api/attributions/run")
+    async def run_scenario(request: RunRequest):
+        scenario = require_runnable_scenario(request.scenario_id)
+        return run_attribution(scenario, app.state.store)
+
+    @app.get("/api/runs/{run_id}")
+    async def get_run(run_id: str):
+        run = app.state.store.get_run(run_id)
+        if run is None:
+            raise HTTPException(status_code=404, detail=f"未找到运行记录：{run_id}")
+        return run
+
+    @app.post("/api/anomalies/{anomaly_id}/samples")
+    async def add_late_sample(anomaly_id: str, request: LateSampleRequest):
+        scenario = deepcopy(require_runnable_scenario(request.scenario_id))
+        target = scenario["target"]
+        expected_anomaly_id = f"{target['reach_id']}-{target['metric']}-{target['event_time']}"
+        if expected_anomaly_id != anomaly_id:
+            raise HTTPException(status_code=400, detail="场景目标异常与路径中的 anomaly_id 不匹配")
+        scenario["current_samples"].append(request.sample)
+        return run_attribution(scenario, app.state.store)
+
+    return app
+
+
+app = create_app()

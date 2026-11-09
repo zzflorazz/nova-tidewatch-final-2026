@@ -249,3 +249,23 @@ class TraceStore:
                 "UPDATE runs SET finished_at = ?, status = ?, error_message = ? WHERE run_id = ?",
                 (_now(), status, error_message, run_id),
             )
+
+    def list_anomalies(self) -> list[dict]:
+        rows = self._db.execute(
+            "SELECT * FROM anomalies ORDER BY first_detected_at ASC, anomaly_id ASC"
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def get_run(self, run_id: str) -> dict | None:
+        row = self._db.execute(
+            "SELECT * FROM runs WHERE run_id = ?", (run_id,),
+        ).fetchone()
+        return dict(row) if row is not None else None
+
+    def sample_exists(self, reach_id, metric, event_time, value) -> bool:
+        row = self._db.execute(
+            "SELECT 1 FROM samples WHERE reach_id = ? AND metric = ? "
+            "AND event_time = ? AND value = ? LIMIT 1",
+            (reach_id, metric, _timestamp(event_time), float(value)),
+        ).fetchone()
+        return row is not None
