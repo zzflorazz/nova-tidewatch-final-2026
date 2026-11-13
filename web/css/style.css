@@ -235,3 +235,9 @@ body {
 .ev-btn.handle  { background: var(--danger); }
 .ev-btn.recover { background: var(--ok); }
 .ev-btn.close   { background: #6b7280; }
+
+/* Monitor / Trace navigation; existing monitoring behavior is unchanged. */
+.top-right { flex-wrap: wrap; }
+.trace-link { display: inline-block; padding: 7px 12px; border: 1px solid var(--card-border); border-radius: 6px; color: var(--text); background: var(--card); font-size: 14px; text-decoration: none; }
+.trace-link:hover, .trace-link:focus-visible { border-color: var(--turbid); color: var(--turbid); }
+.site-purpose { margin: 14px 24px; color: var(--text-dim); font-size: 13px; line-height: 1.6; }

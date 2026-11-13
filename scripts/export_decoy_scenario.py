@@ -18,6 +18,8 @@ def build_demo():
     scenario.update(
         scenario_id="D1", status="implemented", data_classification="SIMULATED",
         origin="self_built_demo", injected_source_ids=sorted(truth),
+        display_name="自建对照·幅度干扰",
+        display_note="本地幅度更大但时序不符，用于对照规则与模型的排序差异",
         demo_note="自建对照场景：用于展示规则排序误判与模型排序纠正，不属于案例书 S1–S5；注入真源为 reach-a，不代表真实水体因果证明。",
     )
     return scenario

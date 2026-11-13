@@ -30,6 +30,12 @@
   }
   #title .hint { display: block; font-size: 12px; color: var(--text-dim); font-weight: 400; margin-top: 4px; }
 
+  .trace-link { display: inline-block; margin-left: 12px; padding: 6px 12px;
+    border: 1px solid var(--card-border); border-radius: 6px;
+    background: rgba(19, 34, 56, .85); color: var(--text);
+    font-size: 14px; font-weight: 500; text-decoration: none; text-shadow: none; }
+  .trace-link:hover, .trace-link:focus-visible { border-color: var(--turbid); color: var(--turbid); }
+
   /* 连接状态 */
   #conn-chip {
     position: fixed; top: 18px; right: 18px; z-index: 11;
@@ -47,6 +53,10 @@
     padding: 9px; font-weight: 700;
   }
   .hidden { display: none !important; }
+  /* Keep navigation visible below the offline status banner. */
+  body:has(#disconnect-banner:not(.hidden)) #title,
+  body:has(#disconnect-banner:not(.hidden)) #conn-chip { top: 64px; }
+  body:has(#disconnect-banner:not(.hidden)) #panel { top: 118px; }
 
   /* 右上状态面板 */
   #panel {
@@ -94,6 +104,7 @@
 
   <div id="title">
     🌊 TideWatch 3D 数字空间
+    <a class="trace-link" href="../workbench/">异常溯源工作台</a>
     <span class="hint">拖拽旋转 · 滚轮缩放 · 点击断面标记查看详情</span>
   </div>
 
@@ -129,9 +140,9 @@
 
   <div id="tooltip" class="hidden"></div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/OrbitControls.js"></script>
+  <script src="vendor/mqtt.min.js"></script>
   <script src="js/rules.js"></script>
   <script src="js/mqtt_client.js"></script>
   <script src="js/scene3d.js"></script>

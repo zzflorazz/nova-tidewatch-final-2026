@@ -1,5 +1,7 @@
 {
   "scenario_id": "D1",
+  "display_name": "自建对照·幅度干扰",
+  "display_note": "本地幅度更大但时序不符，用于对照规则与模型的排序差异",
   "seed": 20261113,
   "analysis_time": "2026-11-02T12:01:00+08:00",
   "data_classification": "SIMULATED",

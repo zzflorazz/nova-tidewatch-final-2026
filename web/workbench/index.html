@@ -12,8 +12,12 @@
 <body>
   <header class="topbar">
     <div class="brand"><span class="brand-mark" aria-hidden="true">≈</span><h1>TideWatch Trace <span>V1.0 · 多断面异常溯源工作台</span></h1></div>
-    <span class="connection" id="connection" role="status">正在读取场景…</span>
+    <div class="topbar-actions">
+      <a class="monitor-link" href="../monitor/index.html">监测视图</a>
+      <span class="connection" id="connection" role="status">正在读取场景…</span>
+    </div>
   </header>
+  <p class="workbench-purpose">本页基于告警后的断面数据做候选来源分析。监测台看「哪里异常」，工作台看「来源在哪、下一步查哪」。</p>
   <div class="simulation"><strong>SIMULATED</strong><span>全部数据为教学模拟，非真实水体观测</span></div>
   <main class="workspace">
     <aside class="sidebar" aria-labelledby="scenarios-heading">
@@ -26,23 +30,36 @@
     <section id="results" class="results" aria-labelledby="results-heading" aria-busy="false">
       <div class="section-heading"><h2 id="results-heading">归因结果</h2><span id="selection-label">尚未选择场景</span></div>
       <div id="feedback" role="status" aria-live="polite"></div>
+      <nav class="result-nav" aria-label="结果区导航">
+        <a href="#overview">总览</a><a href="#active-anomaly">活动异常</a><a href="#attribution-board">归因看板</a><a href="#evidence-chain">证据链</a><a href="#next-check">下一步排查</a>
+      </nav>
       <div id="result-content">
-        <div class="empty-state">
-          <div class="empty-heading"><span class="line-label">从下游变化，回查上游证据</span><h3>异常出现在哪里，<br>证据支持哪个来源？</h3></div>
-          <div class="river" aria-label="水系拓扑：上游 reach-a 到中游 reach-b 到下游 reach-c">
-            <div><i></i><strong>reach-a</strong><span>上游断面</span></div><b aria-hidden="true">→</b>
-            <div><i></i><strong>reach-b</strong><span>中游断面</span></div><b aria-hidden="true">→</b>
-            <div><i></i><strong>reach-c</strong><span>下游断面</span></div>
-          </div>
-          <p>从左侧选择教学场景，查看断面健康、候选来源与排除依据。<br>证据不足时保留“来源未定”，不把相关性当作因果。</p>
-          <div class="empty-legend"><span>分断面历史基线</span><span>事件时间与传播窗口</span><span>模型仅重排序</span></div>
-        </div>
+        <section id="overview" class="result-block" aria-labelledby="overview-heading">
+          <h3 id="overview-heading">总览 <span>Overview</span></h3>
+          <div id="overview-content"><p class="empty-small">从左侧选择场景并运行，查看 A → B → C 的当前观测、基线与数据状态。</p></div>
+        </section>
+        <section id="active-anomaly" class="result-block conclusion-block" aria-labelledby="active-anomaly-heading">
+          <h3 id="active-anomaly-heading">活动异常 <span>Active Anomaly</span></h3>
+          <div id="active-anomaly-content"><p class="empty-small">运行后展示原始结论与版本信息；证据不足时保留来源未定。</p></div>
+        </section>
+        <section id="attribution-board" class="result-block" aria-labelledby="attribution-board-heading">
+          <h3 id="attribution-board-heading">归因看板 <span>Attribution Board</span></h3>
+          <div id="attribution-board-content"><p class="empty-small">运行后展示保留与排除项、幅度比和模型排序对比。</p></div>
+        </section>
+        <section id="evidence-chain" class="result-block" aria-labelledby="evidence-chain-heading">
+          <h3 id="evidence-chain-heading">证据链 <span>Evidence Chain</span></h3>
+          <div id="evidence-chain-content"><p class="empty-small">运行后展示当前版本的输入摘要与证据缺口。</p></div>
+          <section id="version-history" class="history-panel" hidden aria-labelledby="version-heading">
+            <div class="section-heading"><h4 id="version-heading">版本历史</h4><span id="version-selection"></span></div>
+            <p class="subtle">点击版本回查当时的归因；历史结论保留，不覆盖。</p>
+            <div id="version-list" class="version-timeline"></div>
+          </section>
+        </section>
+        <section id="next-check" class="result-block" aria-labelledby="next-check-heading">
+          <h3 id="next-check-heading">下一步排查 <span>Next Check</span></h3>
+          <div id="next-check-content"><p class="empty-small">运行后按原有优先级列出查什么、在哪查及对应证据缺口。</p></div>
+        </section>
       </div>
-      <section id="version-history" class="result-block" hidden aria-labelledby="version-heading">
-        <div class="section-heading"><h3 id="version-heading">版本历史</h3><span id="version-selection"></span></div>
-        <p class="subtle">点击版本回查当时的归因；历史结论保留，不覆盖。</p>
-        <div id="version-list" class="version-timeline"></div>
-      </section>
       <section id="backfill-section" class="result-block backfill-section" hidden aria-labelledby="backfill-heading">
         <h3 id="backfill-heading">追加迟到样本</h3>
         <p class="backfill-note">模拟录入，仅用于演示迟到数据回补</p>

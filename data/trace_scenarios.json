@@ -3,6 +3,8 @@
   "scenarios": [
     {
       "scenario_id": "S1",
+      "display_name": "基线平稳",
+      "display_note": "各断面均无活动异常，不产生候选",
       "seed": 20261102,
       "analysis_time": "2026-11-02T09:46:00+08:00",
       "data_classification": "SIMULATED",
@@ -505,6 +507,8 @@
     },
     {
       "scenario_id": "S2",
+      "display_name": "单源明确",
+      "display_note": "上游事件时间与幅度一致，其余候选有明确排除依据",
       "seed": 2026110202,
       "analysis_time": "2026-11-02T09:30:00+08:00",
       "data_classification": "SIMULATED",
@@ -796,6 +800,8 @@
     },
     {
       "scenario_id": "S3",
+      "display_name": "多源候选",
+      "display_note": "上游与本地同时可疑，保留两个候选，结论为来源未定",
       "seed": 2026110303,
       "analysis_time": "2026-11-02T11:05:00+08:00",
       "data_classification": "SIMULATED",
@@ -1101,6 +1107,8 @@
     },
     {
       "scenario_id": "S4a",
+      "display_name": "同现象·上游来源",
+      "display_note": "C 浊度上升与上游同步，且有施工记录缺失",
       "seed": 2026110601,
       "analysis_time": "2026-11-02T10:21:00+08:00",
       "data_classification": "SIMULATED",
@@ -1396,6 +1404,8 @@
     },
     {
       "scenario_id": "S4b",
+      "display_name": "同现象·本地来源",
+      "display_note": "C 异常幅度相近，但上游平稳，本地有施工记录",
       "seed": 2026110602,
       "analysis_time": "2026-11-02T16:41:00+08:00",
       "data_classification": "SIMULATED",
@@ -1703,6 +1713,8 @@
     },
     {
       "scenario_id": "S5",
+      "display_name": "关键上游失联",
+      "display_note": "上游数据缺失，结论降级为来源未定；补数后可重新归因",
       "seed": 2026110305,
       "analysis_time": "2026-11-02T14:35:00+08:00",
       "data_classification": "SIMULATED",

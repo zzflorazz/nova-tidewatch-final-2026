@@ -17,11 +17,17 @@ def client():
 def test_health(client):
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "data_classification": "SIMULATED"}
+    health = response.json()
+    assert health["status"] == "ok"
+    assert health["data_classification"] == "SIMULATED"
+    assert health["database"]["status"] == "ok"
+    assert health["model"]["status"] == "loaded"
     business_routes = [r for r in client.app.routes if r.path.startswith("/api/")]
-    assert len(business_routes) == 12
+    assert len(business_routes) == 15
     assert [(r.path, r.methods) for r in business_routes if r.methods != {"GET"}] == [
+        ("/api/scenario/load", {"POST"}),
         ("/api/attributions/run", {"POST"}),
+        ("/api/analyze", {"POST"}),
         ("/api/anomalies/{anomaly_id}/samples", {"POST"}),
     ]
 
@@ -32,7 +38,7 @@ def test_list_scenarios_returns_all_implemented(client):
     scenarios = response.json()
     assert [s["scenario_id"] for s in scenarios] == ["S1", "S2", "S3", "S4a", "S4b", "S5", "D1"]
     assert all(s["status"] == "implemented" for s in scenarios)
-    assert all(set(s) == {"scenario_id", "status", "analysis_time", "target", "origin"} for s in scenarios)
+    assert all(set(s) == {"scenario_id", "status", "analysis_time", "target", "origin", "display_name", "display_note"} for s in scenarios)
     assert scenarios[0]["target"] is None
 
 

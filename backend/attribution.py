@@ -348,6 +348,16 @@ def analyze_attribution(scenario):
     for candidate in candidates:
         gaps.extend(candidate['evidence_gaps'])
     gaps = list(dict.fromkeys(gaps))
+    for candidate in candidates:
+        upstream = (candidate['source_type'] == 'upstream'
+                    and candidate['role'] != 'missing_evidence'
+                    and candidate['absolute_change'] is not None)
+        candidate['attenuation'] = (round(candidate['absolute_change'] / target['absolute_change'], 6)
+                                    if upstream and target['absolute_change'] > 0 else None)
+        candidate['attenuation_note'] = (
+            '该上游断面的绝对变化量除以目标断面的绝对变化量，保留六位小数；仅为幅度比，不单独判定来源。'
+            if upstream and target['absolute_change'] > 0 else
+            '本地或缺证据候选不计算上游幅度比；目标绝对变化量为零时亦不计算。')
     return {
         'scenario_id': report['scenario_id'], 'seed': report['seed'],
         'analysis_time': report['analysis_time'], 'data_classification': report['data_classification'],

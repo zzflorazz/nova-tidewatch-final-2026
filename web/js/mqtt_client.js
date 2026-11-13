@@ -1,6 +1,6 @@
 // TideWatch 浏览器端 MQTT 客户端封装（支持多 topic 订阅）
 // 依赖：页面中先引入 mqtt.js
-//   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+//   <script src="vendor/mqtt.min.js"></script>
 // 暴露全局对象 TideWatchMQTT：
 //   connect() / subscribe(cb) / subscribeTopic(topic, cb) / publish(reachId, data) /
 //   publishTopic(topic, data) / isConnected() / onConnectionChange(cb)
@@ -15,6 +15,18 @@ const TideWatchMQTT = (() => {
   const topicCallbacks = {};    // topic 过滤器 -> [回调...]
   const subscribedTopics = {};  // topic 过滤器 -> 是否已订阅
   const statusCallbacks = [];
+
+  // Presentation only: do not alter connection, subscription or message state.
+  function _offlineNotice(show) {
+    if (typeof document === 'undefined') return;
+    const banner = document.getElementById('disconnect-banner');
+    if (!banner) return;
+    if (show) {
+      banner.textContent = '未连接实时数据源，当前展示为离线静态视图';
+      banner.setAttribute('role', 'status');
+    }
+    banner.classList.toggle('hidden', !show);
+  }
 
   function onConnectionChange(callback) {
     if (typeof callback === 'function') statusCallbacks.push(callback);
@@ -55,7 +67,8 @@ const TideWatchMQTT = (() => {
 
   function connect() {
     if (typeof mqtt === 'undefined') {
-      console.error('[TideWatchMQTT] 未找到 mqtt.js，请先引入 https://unpkg.com/mqtt/dist/mqtt.min.js');
+      console.error('[TideWatchMQTT] 未找到 mqtt.js，请检查 vendor/mqtt.min.js');
+      _offlineNotice(true);
       return null;
     }
     if (client) return client;
@@ -71,6 +84,7 @@ const TideWatchMQTT = (() => {
       connected = true;
       console.log(`[TideWatchMQTT] ✓ 已连接 ${BROKER_WS_URL}`);
       _emitStatus(true);
+      _offlineNotice(false);
       _resubscribeAll();
     });
 
@@ -82,16 +96,19 @@ const TideWatchMQTT = (() => {
       if (connected) console.log('[TideWatchMQTT] ✗ 连接已断开');
       connected = false;
       _emitStatus(false);
+      _offlineNotice(true);
     });
 
     client.on('offline', () => {
       console.log('[TideWatchMQTT] ✗ 已离线');
       connected = false;
       _emitStatus(false);
+      _offlineNotice(true);
     });
 
     client.on('error', (err) => {
       console.error('[TideWatchMQTT] 连接错误:', err.message || err);
+      _offlineNotice(true);
     });
 
     client.on('message', (topic, payload) => {
