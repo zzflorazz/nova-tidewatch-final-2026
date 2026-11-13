@@ -57,7 +57,7 @@ python python/rules.py
 本次全量输出尾部：
 
 ```text
-127 passed, 1 warning in 4.55s
+156 passed, 1 warning in 6.45s
 ```
 
 警告原文为 `StarletteDeprecationWarning: Using httpx with starlette.testclient is deprecated; install httpx2 instead.`（原输出的 httpx 和 starlette.testclient 带反引号）。它来自当前依赖组合，不是测试失败；本项目仍按现有 requirements 安装，未为消除提示修改依赖。

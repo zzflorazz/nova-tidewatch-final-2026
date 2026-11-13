@@ -52,7 +52,7 @@ PYTHONPATH=. pytest tests -q
 python python/rules.py
 ```
 
-2026-11-13 实测：`127 passed, 1 warning in 4.55s`；旧 C02 规则 `通过 4/4`。警告来自 Starlette TestClient 对当前 httpx 的弃用提示，测试未失败。
+2026-11-13 实测：`156 passed, 1 warning in 6.45s`；旧 C02 规则 `通过 4/4`。警告来自 Starlette TestClient 对当前 httpx 的弃用提示，测试未失败。
 
 重新生成数据、训练模型、导出重排序证据的三个主命令，按顺序执行：
 
