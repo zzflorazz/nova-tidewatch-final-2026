@@ -1,0 +1,2409 @@
+{
+  "generated_at": "2026-11-12T08:06:29.169370+00:00",
+  "data_classification": "SIMULATED",
+  "train_scenarios": 480,
+  "test_scenarios": 120,
+  "train_candidate_rows": 960,
+  "test_candidate_rows": 240,
+  "feature_names": [
+    "time",
+    "absolute_change",
+    "topology",
+    "local_evidence",
+    "log1p(absolute_change_value)",
+    "time_lag_minutes"
+  ],
+  "coefficients": {
+    "time": 2.604958113092494,
+    "absolute_change": -0.17401229210806238,
+    "topology": -2.290940197475841,
+    "local_evidence": 1.774283904690605,
+    "log1p(absolute_change_value)": 0.08341243479096645,
+    "time_lag_minutes": -0.030825351276821268
+  },
+  "feature_means": {
+    "time": 0.5306547229461805,
+    "absolute_change": 0.7621974748503993,
+    "topology": 0.75,
+    "local_evidence": 0.16666666666666666,
+    "log1p(absolute_change_value)": 3.1563706086370593,
+    "time_lag_minutes": 19.016138909809026
+  },
+  "feature_stds": {
+    "time": 0.37650095652688176,
+    "absolute_change": 0.24495354258761695,
+    "topology": 0.25,
+    "local_evidence": 0.23570226039551587,
+    "log1p(absolute_change_value)": 0.3447678794646243,
+    "time_lag_minutes": 9.18973729135038
+  },
+  "metrics": {
+    "rule": {
+      "top1_accuracy": 0.6666666666666666,
+      "mrr": 0.8333333333333334,
+      "scenarios": 120
+    },
+    "model": {
+      "top1_accuracy": 1.0,
+      "mrr": 1.0,
+      "scenarios": 120
+    },
+    "fusion": {
+      "top1_accuracy": 1.0,
+      "mrr": 1.0,
+      "scenarios": 120
+    }
+  },
+  "by_family": {
+    "decoy_local": {
+      "rule": {
+        "top1_accuracy": 0.0,
+        "scenarios": 40
+      },
+      "model": {
+        "top1_accuracy": 1.0,
+        "scenarios": 40
+      },
+      "fusion": {
+        "top1_accuracy": 1.0,
+        "scenarios": 40
+      }
+    },
+    "decoy_upstream": {
+      "rule": {
+        "top1_accuracy": 1.0,
+        "scenarios": 40
+      },
+      "model": {
+        "top1_accuracy": 1.0,
+        "scenarios": 40
+      },
+      "fusion": {
+        "top1_accuracy": 1.0,
+        "scenarios": 40
+      }
+    },
+    "single_upstream": {
+      "rule": {
+        "top1_accuracy": 1.0,
+        "scenarios": 40
+      },
+      "model": {
+        "top1_accuracy": 1.0,
+        "scenarios": 40
+      },
+      "fusion": {
+        "top1_accuracy": 1.0,
+        "scenarios": 40
+      }
+    }
+  },
+  "limitations": [
+    "训练与评估均基于程序化生成数据，不代表真实水体场景准确率",
+    "decoy 族中 true source 与 decoy 在 time 特征上差异明显，模型可能高估泛化能力",
+    "候选排序概率为相对分，不是因果概率"
+  ],
+  "training": {
+    "l2": 0.01,
+    "iterations": 1500,
+    "learning_rate": 0.1,
+    "log_loss": 0.08095454967443785
+  },
+  "evaluation_policy": {
+    "eligible": "retained independent_source only, same pool for all strategies",
+    "single_candidate_test_scenarios": 40,
+    "rule_weights": {
+      "time": 30.0,
+      "absolute_change": 40.0,
+      "topology": 10.0,
+      "local_evidence": 20.0
+    },
+    "rule_normalization": "score / sum(weights)",
+    "tie_break": "source_id ascending",
+    "fusion_model_weight": 0.5
+  },
+  "data_sha256": "1b6084744119cc408cc96dd3fa679923d54c7031fcc58bc3d42e13c49dc04a71",
+  "model_sha256": "65bb6f4cf7261b24090adcd61cae52f0d54f69a9c53db03f8e2a97556ec22f14",
+  "scenario_results": [
+    {
+      "scenario_uid": "decoy_local-20262270",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262271",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262272",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262273",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262274",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262275",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262276",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262277",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262278",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262279",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262280",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262281",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262282",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262283",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262284",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262285",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262286",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262287",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262288",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262289",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262290",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262291",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262292",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262293",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262294",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262295",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262296",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262297",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262298",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262299",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262300",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262301",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262302",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262303",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262304",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262305",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262306",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262307",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262308",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_local-20262309",
+      "family": "decoy_local",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 2
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262470",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262471",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262472",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262473",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262474",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262475",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262476",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262477",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262478",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262479",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262480",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262481",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262482",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262483",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262484",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262485",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262486",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262487",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262488",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262489",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262490",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262491",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262492",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262493",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262494",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262495",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262496",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262497",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262498",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262499",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262500",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262501",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262502",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262503",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262504",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262505",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262506",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262507",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262508",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "decoy_upstream-20262509",
+      "family": "decoy_upstream",
+      "true_source": "reach-c:local",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-c:local",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261270",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261271",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261272",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261273",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261274",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261275",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261276",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261277",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261278",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261279",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261280",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261281",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261282",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261283",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261284",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261285",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261286",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261287",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261288",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261289",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261290",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261291",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261292",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261293",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261294",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261295",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261296",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261297",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261298",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261299",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261300",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261301",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261302",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261303",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261304",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261305",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261306",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261307",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261308",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    },
+    {
+      "scenario_uid": "single_upstream-20261309",
+      "family": "single_upstream",
+      "true_source": "reach-a",
+      "strategies": {
+        "rule": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "model": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        },
+        "fusion": {
+          "top_source": "reach-a",
+          "true_source_rank": 1
+        }
+      }
+    }
+  ]
+}

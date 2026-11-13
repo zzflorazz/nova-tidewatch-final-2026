@@ -3,26 +3,38 @@
 import json
 from contextlib import asynccontextmanager
 from copy import deepcopy
+from functools import lru_cache
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from .reranker import Reranker, rerank_attribution
 from .store import TraceStore
 from .trace_runner import run_attribution
 
 
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "trace_scenarios.json"
 DEFAULT_DB_PATH = Path(__file__).resolve().parents[1] / "data" / "trace.db"
+MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "reranker.json"
 
 
 class RunRequest(BaseModel):
     scenario_id: str
+    use_rerank: bool = False
 
 
 class LateSampleRequest(BaseModel):
     scenario_id: str
     sample: dict
+
+
+@lru_cache(maxsize=1)
+def load_reranker() -> Reranker:
+    try:
+        return Reranker.from_dict(json.loads(MODEL_PATH.read_text(encoding="utf-8")))
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        raise HTTPException(status_code=503, detail="重排序模型不可用") from error
 
 
 def load_scenarios() -> list[dict]:
@@ -149,7 +161,20 @@ def create_app(db_path: str | None = None) -> FastAPI:
     @app.post("/api/attributions/run")
     async def run_scenario(request: RunRequest):
         scenario = require_runnable_scenario(request.scenario_id)
-        return run_attribution(scenario, app.state.store)
+        output = run_attribution(scenario, app.state.store)
+        if request.use_rerank:
+            output["reranking"] = rerank_attribution(output, load_reranker())
+        return output
+
+    @app.get("/api/anomalies/{anomaly_id}/rerank")
+    async def get_reranking(anomaly_id: str, version: int | None = None):
+        require_anomaly(anomaly_id)
+        attribution = app.state.store.get_attribution(anomaly_id, version)
+        if attribution is None:
+            detail = "该异常暂无归因版本" if version is None else f"未找到归因版本：{version}"
+            raise HTTPException(status_code=404, detail=detail)
+        result = rerank_attribution(attribution["output_json"], load_reranker())
+        return {**result, "run_id": attribution["run_id"], "attribution_version": attribution["version"]}
 
     @app.get("/api/runs/{run_id}")
     async def get_run(run_id: str):

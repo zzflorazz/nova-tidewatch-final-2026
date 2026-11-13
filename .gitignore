@@ -9,3 +9,6 @@ data/*.csv
 !data/*example.csv
 # Trace 运行时数据库不入库
 data/*.db
+# Generated simulated training/contract datasets
+data/simulated_candidates.jsonl
+data/simulated_contract.jsonl

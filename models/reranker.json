@@ -1,0 +1,41 @@
+{
+  "format_version": 1,
+  "feature_names": [
+    "time",
+    "absolute_change",
+    "topology",
+    "local_evidence",
+    "log1p(absolute_change_value)",
+    "time_lag_minutes"
+  ],
+  "coefficients": {
+    "time": 2.604958113092494,
+    "absolute_change": -0.17401229210806238,
+    "topology": -2.290940197475841,
+    "local_evidence": 1.774283904690605,
+    "log1p(absolute_change_value)": 0.08341243479096645,
+    "time_lag_minutes": -0.030825351276821268
+  },
+  "intercept": -0.20354859667141742,
+  "feature_means": {
+    "time": 0.5306547229461805,
+    "absolute_change": 0.7621974748503993,
+    "topology": 0.75,
+    "local_evidence": 0.16666666666666666,
+    "log1p(absolute_change_value)": 3.1563706086370593,
+    "time_lag_minutes": 19.016138909809026
+  },
+  "feature_stds": {
+    "time": 0.37650095652688176,
+    "absolute_change": 0.24495354258761695,
+    "topology": 0.25,
+    "local_evidence": 0.23570226039551587,
+    "log1p(absolute_change_value)": 0.3447678794646243,
+    "time_lag_minutes": 9.18973729135038
+  },
+  "l2": 0.01,
+  "learning_rate": 0.1,
+  "iterations": 1500,
+  "random_seed": 42,
+  "training_log_loss": 0.08095454967443785
+}

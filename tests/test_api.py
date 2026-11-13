@@ -19,7 +19,7 @@ def test_health(client):
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "data_classification": "SIMULATED"}
     business_routes = [r for r in client.app.routes if r.path.startswith("/api/")]
-    assert len(business_routes) == 11
+    assert len(business_routes) == 12
     assert [(r.path, r.methods) for r in business_routes if r.methods != {"GET"}] == [
         ("/api/attributions/run", {"POST"}),
         ("/api/anomalies/{anomaly_id}/samples", {"POST"}),
