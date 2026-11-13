@@ -15,12 +15,14 @@ from backend.store import TraceStore
 from backend.trace_runner import run_attribution
 
 
-SCENARIO_IDS = ("S2", "S3", "S4a", "S4b", "S5")
+SCENARIO_IDS = ("S2", "S3", "S4a", "S4b", "S5", "D1")
 
 
 def main():
     scenarios = {s["scenario_id"]: s for s in json.loads(
         (ROOT / "data/trace_scenarios.json").read_text(encoding="utf-8"))["scenarios"]}
+    demo_path = ROOT / "data/demo_decoy_scenario.json"
+    scenarios["D1"] = json.loads(demo_path.read_text(encoding="utf-8"))
     model = Reranker.from_dict(json.loads((ROOT / "models/reranker.json").read_text(encoding="utf-8")))
     records = []
     with tempfile.TemporaryDirectory(prefix="tidewatch-rerank-contract-") as temp_dir:
@@ -50,8 +52,12 @@ def main():
                     versions.append({"version": attribution["version"], "run_id": attribution["run_id"],
                                      "output": original, "reranking": reranking})
                 latest = versions[-1]["reranking"]
+                if sid == "D1":
+                    assert latest["rule_order"] != latest["model_order"]
+                    assert latest["model_order"][0] in s["injected_source_ids"]
                 records.append({
-                    "scenario_id": sid,
+                    "scenario_id": sid, "origin": s.get("origin", "case_book"),
+                    "candidates": latest["candidates"],
                     **{key: latest[key] for key in ("status", "rule_order", "model_order", "order_changed",
                                                     "constraints", "applied", "reason", "model_version")},
                     "versions": versions,
@@ -61,7 +67,7 @@ def main():
         "scenarios": records,
         "summary": {"total": len(records), "order_changed": sum(r["order_changed"] for r in records),
                     "skipped": sum(not r["applied"] for r in records)},
-        "note": "模型仅重排序，不改变业务判断；summary 按五个场景的最新版统计，S5 同时保留版本1与补数后的版本2。",
+        "note": "模型仅重排序，不改变业务判断；summary 按五个案例书场景和 D1 自建对照场景的最新版统计，S5 同时保留版本1与补数后的版本2；D1 不属于案例书 S1–S5。",
     }
     path = ROOT / "evidence/rerank_contract.json"
     path.write_text(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")

@@ -1,224 +1,160 @@
-# TideWatch 河道水位水质智能监测系统
+# TideWatch Trace V1.0
 
-## 项目简介
-面向多河道断面的水位与水质智能监测、预警与多端协同系统。
-系统同时处理 3 个模拟河道断面（reach-a 上游 / reach-b 中游 / reach-c 下游），实现环境监测、预警、干预、恢复的完整事件闭环。
+面向园区水系的多断面异常溯源与排查辅助系统（TideWatch Trace V1.0）。通过各断面的历史基线、上下游传播时序和本地记录，给出候选来源、排除依据、证据缺口与后续排查建议，辅助人工核查。
 
-## 核心能力
-- **2 条数据链**：离线分析链（CSV → Python → report.html）+ 边缘实时链（MQTT → 多端同步）
-- **多端协同**：Web 监测台 + 移动端 H5 + 3D 数字空间，共享同一套实时状态
-- **事件闭环**：发现 → 优先关注 → 干预 → 验证 → 恢复/未恢复 → 记录复盘
-- **规则 + ML 对照**：固定阈值规则与 IsolationForest 并列判断，组合裁决
+> **SIMULATED：全部数据为教学模拟，非真实水体观测。** 排序分为相对分，不是概率，也不是因果证明。模型输出的 sigmoid 分数未校准；“证据支持”不能解释为“已证明来源”。本地施工记录仍需人工核实。
 
-## 统一约定
+## 已实现能力
 
-### 3 个河道断面
-| 断面 | 位置 |
-|------|------|
-| reach-a | 上游 |
-| reach-b | 中游 |
-| reach-c | 下游 |
+| 能力 | 实现与边界 |
+|---|---|
+| 分断面基线 | `backend/baseline.py` 按 `reach_id + metric` 独立计算中位数、Q1、Q3、IQR。偏离度为 `(当前值−中位数)/IQR`，绝对变化量为两者差的绝对值；零 IQR 使用配置的最小噪声并记录 fallback。 |
+| 案例与对照 | S1–S5 五类案例，其中 S4 拆为 S4a/S4b，共六个案例书条目；另有 D1 自建对照，明确标记非案例书场景。 |
+| 候选与传播 | `backend/attribution.py` 沿拓扑逆向生成候选，结合事件时间窗口、真实基线变化和本地证据排序；传播经过保留展示，不计为独立来源。 |
+| 缺证据保留未定 | 上游缺测或证据不足时返回 `UNRESOLVED`，同时给出缺口和核查建议，不强行唯一归因。 |
+| 持久化与版本 | `backend/store.py`、`backend/trace_runner.py` 使用 SQLite 保存样本、异常、归因版本和 Run Trace。迟到样本追加、旧值及旧结论保留；重复运行跳过已存在的同断面/指标/事件时间/值样本，但仍生成新归因版本。 |
+| API 与工作台 | `backend/api.py` 提供查询、运行、补数、版本证据链和重排序接口；`web/workbench/` 是无构建工具的静态工作台，含数据健康、候选/排除依据、历史版本和补数表单。 |
+| 可解释重排序 | `backend/reranker.py` 为纯 Python 逻辑回归。只对 `retained + independent_source` 同池重排，提供排序前后对照、标准化特征贡献、截距与 logit，不改变业务状态、结论、证据等级或排除依据。 |
 
-### 统一判级规则（按顺序，水位优先）
-1. waterLevel ≥ 8.5 → 洪水预警
-2. 否则 waterLevel ≥ 7.0 → 高水位警戒
-3. 否则 turbidity ≥ 60 → 水质浑浊
-4. 其余 → 正常
+旧 C02 固定阈值仅负责告警，不能替代 Trace 基线和来源判断；旧事件链丢弃迟到数据的行为也不用于 Trace。C02 的 `python/` 与原有 `web/` 页面保留，Trace 工作台启动不需要同时启动 MQTT 或旧事件服务。
 
-### 水流等级 flowLevel
-| 值 | 含义 |
-|----|------|
-| 0 | 缓流 |
-| 1 | 平稳 |
-| 2 | 湍急 |
-| 3 | 湍流 |
+## 快速开始
 
-### 统一 JSON 字段
-```json
-{"reachId":"reach-b","waterLevel":9.0,"turbidity":20,"flowLevel":2,"status":"洪水预警","time":"2026-10-08 20:30:00"}
-```
+以下命令从项目根目录执行，适用于 macOS 的 zsh/bash；在其他机器复现时，将第一条 cd 的路径替换为实际检出目录。当前复核环境为 Python **3.14.7**；依赖未锁版本，其他环境的安装版本与耗时以实际运行为准。
 
-## 环境要求
-- Node.js ≥ 18
-- Python ≥ 3.9
-- mosquitto（MQTT Broker）
-- 现代浏览器（Chrome / Edge 最佳；摄像头与语音功能需要浏览器授权）
-
-## MQTT 约定
-- Broker TCP: localhost:1883
-- Broker WebSocket: localhost:8083/mqtt
-- 数据 Topic: tidewatch/{reachId}/data
-- 事件 Topic: tidewatch/events/{reachId}
-- 消息格式：{"reachId":"reach-b","waterLevel":9.0,"turbidity":20,"flowLevel":2,"status":"洪水预警","time":"2026-10-08 20:30:00"}
-- 订阅通配符：tidewatch/+/data
-
-## Python 依赖
 ```bash
-# 边缘实时链（数据链 B）所需
-pip3 install paho-mqtt
-
-# 离线分析链（数据链 A）所需
-pip3 install pandas matplotlib scikit-learn joblib
-
-# 全部依赖一行安装
-pip3 install paho-mqtt pandas matplotlib scikit-learn joblib
+cd /Users/xiaoyi/nova-tidewatch-final-2026
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
-- 生成离线分析报告：`python3 python/generate_report.py` → 输出 `report/report.html`（含统计表格、趋势图、异常记录、ML 摘要）。自动读取 `data/history.csv`，不存在时回退 `data/history_example.csv`（克隆后开箱即用）
-- 训练轻量 ML 模型：`python3 python/train_ml.py` → 输出 `python/ml_model.joblib`
-- D5 规则/ML 对照分析：`python3 python/compare_rule_ml.py` → 输出 `report/compare_rule_ml.html`（一致率 / 交叉统计 / 不一致案例 / 决策边界散点图 / 3 种组合裁决策略统计）。
-  规则基于**阈值**（是否越界），ML 基于**历史分布**（是否异常）——两者关注不同问题，**不一致是正常现象**；
-  报告推荐**策略C 组合裁决**（两者皆异常才确认报警，不一致转入人工复核，减少误报和漏报）。
-  Web 端 4 组回归数据对照页：`http://localhost:8080/compare.html`
 
-自动化验证（可选，用于 Web 监测台回归测试）：
+训练 JSONL 是被 `.gitignore` 忽略的生成物。先生成，避免全量测试找不到训练数据；D1 可由固定 seed 重建：
+
 ```bash
-pip3 install playwright && python3 -m playwright install chromium
-python3 scripts/verify_web.py   # 验证不串线/断线横幅/自动重连，截图输出到 evidence/D1/
+python scripts/generate_training_data.py
+python scripts/export_decoy_scenario.py
 ```
 
-## 目录结构
-```
-nova-tidewatch-final-2026/
-├── web/                  # 前端页面（全部为纯静态页，mqtt.js 走 CDN，无构建步骤）
-│   ├── index.html        # Web 监测台（D1 / D2 / D3 事件面板）
-│   ├── mobile.html       # 移动端 H5（E3 跨端同步，浏览器 F12 切移动视图）
-│   ├── 3d.html           # 3D 数字空间（E1，Three.js r128 CDN）
-│   ├── multimodal.html   # 摄像头 / 语音交互（E2，浏览器原生 API）
-│   ├── compare.html      # 规则 / ML 对照页（D5）
-│   ├── js/rules.js       # 统一判级规则（JS 版，与 python 版一致）
-│   └── js/mqtt_client.js # TideWatchMQTT：多 topic 订阅 / 发布 / 自动重连
-├── python/               # Python 后端与分析
-│   ├── rules.py          # 统一判级规则（Python 版）
-│   ├── shared_state.py   # 共享实时状态服务（HTTP :8000）
-│   ├── event_manager.py  # 事件状态机（HTTP :8001）
-│   ├── mqtt_node.py      # 水文节点模拟器（3 断面）
-│   ├── analyze.py / generate_report.py / train_ml.py / compare_rule_ml.py
-│   └── ml_model.joblib   # 已训练的 IsolationForest
-├── data/                 # 示例数据（history_example.csv / reach_example.json）
-├── report/               # 生成的分析报告（report.html / compare_rule_ml.html / 图表）
-├── docs/                 # 技术文档（Word 版）
-├── evidence/             # 证据目录（Challenge / D1–D5 / E1–E3 / Debug / Reproduce / Open）
-├── scripts/              # 演示与自动化验证脚本（send_* / test_* / verify_* / inject_*）
-└── README.md
-```
+启动服务：
 
-## 快速启动（边缘实时链）
-> **推荐一键启动**（后台运行全部组件，日志在 `/tmp/tidewatch/`）：
-> ```bash
-> cd ~/nova-tidewatch-final-2026
-> bash scripts/start_all.sh    # 一键启动；停止：bash scripts/stop_all.sh
-> ```
-> 以下手动步骤均需在**仓库根目录**执行；若本机已有 mosquitto 服务在运行（`brew services list` 查看），可跳过第 1 步直接复用。
-
-1. 启动 MQTT Broker：`bash scripts/start_broker.sh`（TCP:1883 + WebSocket:8083）
-2. 启动共享状态服务：`python3 python/shared_state.py`（HTTP API 端口 8000）
-3. 启动水文节点模拟器：`python3 python/mqtt_node.py --interval 5`
-4. 浏览器访问 `http://localhost:8000/api/state` 查看实时状态（健康检查 `/api/health`）
-5. 前端页面：`cd web && python3 -m http.server 8080`，然后访问
-   - Web 监测台（D1/D2/D3）：`http://localhost:8080/index.html`
-   - 移动端 H5（E3）：`http://localhost:8080/mobile.html`
-   - 3D 数字空间（E1）：`http://localhost:8080/3d.html`
-   - 多模态交互（E2）：`http://localhost:8080/multimodal.html`
-   - 规则/ML 对照（D5）：`http://localhost:8080/compare.html`
-
-手动发送一条测试消息：
 ```bash
-python3 scripts/send_test_msg.py --reach reach-b --water 9.0 --turbidity 20 --flow 2
+uvicorn backend.api:app --port 8010
 ```
 
-D3 事件链（事件状态机，HTTP API 端口 8001）：
+打开 **http://127.0.0.1:8010/workbench/**。界面所有数据均为模拟。S1 无目标异常，卡片显示“基线场景”且不可点击；选 S2/S3/S4a/S4b/S5 或 D1 运行。运行会写入 `data/trace.db`，重复点击会追加归因版本。停止服务按 Ctrl+C。
+
+另开终端并激活同一虚拟环境，运行测试：
+
 ```bash
-python3 python/event_manager.py     # 事件管理器：异常自动建单，处理干预指令
-python3 scripts/test_event_flow.py  # 端到端事件闭环测试
+source .venv/bin/activate
+PYTHONPATH=. pytest tests -q
+python python/rules.py
 ```
 
-D4 故障注入与修复（5 种故障自动验证）：
+2026-11-13 实测：`127 passed, 1 warning in 4.55s`；旧 C02 规则 `通过 4/4`。警告来自 Starlette TestClient 对当前 httpx 的弃用提示，测试未失败。
+
+重新生成数据、训练模型、导出重排序证据的三个主命令，按顺序执行：
+
 ```bash
-python3 scripts/inject_fault.py --fault broker-down [--recover]   # 演示用：注入单个故障/修复
-python3 scripts/verify_fault.py                                   # 自动验证 5 种故障（约90秒）
+python scripts/generate_training_data.py
+python scripts/train_reranker.py
+python scripts/export_rerank_contract.py
 ```
 
-## 场景复现
+模型写入 `models/reranker.json`，对比结果写入 `evidence/model_comparison.json`，重排序契约证据写入 `evidence/rerank_contract.json`。模型在服务进程内缓存，重新训练后需重启服务。S5 的真实 API 双版本证据可另行导出，无需 uvicorn：
 
-完整复现步骤见 [evidence/Reproduce/README.md](evidence/Reproduce/README.md)。
+```bash
+python scripts/export_trace_api_evidence.py
+```
 
-各场景一键验证命令：
+该脚本使用临时数据库，生成 `evidence/trace_api_s5_evidence.json`，不污染工作台数据库。更多命令、预期输出、单场景示例与故障处理见 [复现指南](docs/reproduce.md)。
 
-| 场景 | 命令 | 说明 |
-|------|------|------|
-| D1 多断面稳定运行 | `python3 scripts/verify_web.py` | 不串线/断线横幅/自动重连 |
-| D2 优先关注 | `python3 scripts/test_priority.py` | 3 组数据优先断面随数据变化 |
-| D3 事件状态机 | `python3 scripts/test_event_flow.py` | OPEN→HANDLING→RECOVERED 闭环 |
-| D4 故障注入 | `python3 scripts/verify_fault.py` | 5 种故障自动验证 |
-| D5 规则/ML 对照 | `python3 python/compare_rule_ml.py` | 一致率+3 种组合策略 |
-| 统一规则 | `python3 python/rules.py` | 4 组回归测试 4/4 通过 |
+## 建议演示顺序
 
-## 验证 Web—移动端实时同步
+| 场景 | 观察点 |
+|---|---|
+| S1 | 基线无活动异常；使用离线基线 CLI 验证，不运行目标归因。 |
+| S2 | 证据支持单源 A；B 为传播经过，不是第二个独立来源。 |
+| S3 | A 与 C 本地同时保留；`MULTI_CANDIDATE`，不强行唯一归因。 |
+| S4a / S4b | C 浊度分别为 27/26，表现相近，但上游变化、传播时序与本地记录不同；分别支持 A / C 本地。 |
+| S5 | A 缺测，版本 1 为 `UNRESOLVED`。补回新鲜正常 A 数据后产生版本 2，旧版本可回查；当前固定补数演示的版本 2 仍为 `UNRESOLVED`。 |
+| D1 | 自建对照，非案例书场景。规则顺序 `reach-c:local → reach-a`，模型顺序 `reach-a → reach-c:local`；排序变化，业务状态仍为 `MULTI_CANDIDATE`。 |
 
-1. 启动全链路（Broker → shared_state → event_manager → mqtt_node → web server）
-2. 桌面端打开 `http://localhost:8080/index.html`
-3. 移动端（或浏览器 F12 切移动视图）打开 `http://localhost:8080/mobile.html`
-4. 发送一条洪水预警数据：`python3 scripts/send_test_msg.py --reach reach-b --water 9.0 --turbidity 20 --flow 2`
-5. **预期**：两端同时显示 reach-b 为洪水预警，事件卡片变为 OPEN
-6. 在桌面端点击"开始处理" → **预期**：移动端事件卡片同步变为 HANDLING
-7. 发送正常数据后，在移动端点击"验证恢复" → **预期**：桌面端事件卡片同步变为 RECOVERED
+S5 补数不是“补完必有答案”：版本 1 结论为“来源未定｜关键上游 reach-a 证据缺失”，版本 2 为“当前证据不足以给出单源结论”。证据改善不等于已证明单源。
 
-原理：两端订阅同一 MQTT topic（`tidewatch/+/data` 和 `tidewatch/events/+`），MQTT 广播天然保证一致性。
+## API 一览
 
-## 正常情况下应看到的结果
+下表对应 `backend/api.py` 实际路由。异常/运行/版本不存在时返回中文 404；无目标异常的 S1 不能通过运行接口执行。
 
-| 操作 | 预期结果 |
-|------|---------|
-| 启动 mqtt_node 后访问 /api/state | 返回 3 个断面的实时 JSON 数据 |
-| 打开 index.html | 3 个断面卡片显示水位/浊度/status，持续更新 |
-| 发送 waterLevel=9.0 | 对应断面卡片变红（洪水预警），自动创建 OPEN 事件 |
-| 点击"开始处理" | 事件状态变黄（HANDLING） |
-| 发送正常数据后点"验证恢复" | 事件状态变绿（RECOVERED） |
-| 打开 3d.html | 看到 3D 河道，3 断面标记颜色随状态变化 |
-| 打开 multimodal.html | 摄像头预览正常，语音指令可执行 |
+| 方法 | 路径 | 用途 |
+|---|---|---|
+| GET | `/api/health` | 健康状态与 SIMULATED 声明 |
+| GET | `/api/scenarios` | 场景摘要及 origin：`case_book` / `self_built_demo` |
+| GET | `/api/scenarios/{scenario_id}` | 完整场景输入 |
+| GET | `/api/anomalies` | 异常列表及最新版本号 |
+| GET | `/api/anomalies/{anomaly_id}` | 单个异常及最新版本号 |
+| GET | `/api/anomalies/{anomaly_id}/attributions` | 按版本升序列出归因摘要 |
+| GET | `/api/anomalies/{anomaly_id}/attributions/{version}` | 完整归因记录、输入快照与输出 |
+| GET | `/api/anomalies/{anomaly_id}/evidence` | 汇总版本、Run Trace、输入摘要和完整证据；可用 `?version=1` |
+| POST | `/api/attributions/run` | 请求 `{"scenario_id":"S2","use_rerank":true}`；执行并保存新版本，重排序默认关闭 |
+| GET | `/api/anomalies/{anomaly_id}/rerank` | 对已保存输出重排序；可用 `?version=1`，不改变原记录 |
+| GET | `/api/runs/{run_id}` | 完整运行状态、关联归因版本及错误信息 |
+| POST | `/api/anomalies/{anomaly_id}/samples` | 请求 `{"scenario_id":"S5","sample":{...}}`；补数并生成新归因版本 |
 
-## 常见问题与排查
+静态挂载 `/workbench/` 提供页面及本地 CSS/JS。补数 sample 必须包含 `reach_id、metric、value、event_time、received_time、source`；时间使用带时区的 ISO8601。工作台会显示真实接口错误。
 
-| 问题 | 排查方法 |
-|------|---------|
-| MQTT 连不上 | 检查 mosquitto 是否运行：`ps aux \| grep mosquitto`；端口 1883/8083 是否被占用 |
-| Web 不更新数据 | 检查 mqtt_node 是否在运行；shared_state 日志是否有报错；浏览器控制台是否有 MQTT 连接错误 |
-| 断面显示离线 | 检查 mqtt_node 是否在发布；/api/health 中 age_seconds 是否 > 10 |
-| 中文显示方框 | matplotlib 中文字体问题，需安装 PingFang SC 或 SimHei |
-| 语音识别无反应 | 使用 Chrome/Edge 浏览器；检查麦克风权限是否授权 |
-| 摄像头打不开 | 使用 localhost 访问（非 IP）；检查摄像头权限 |
+## 本次复核结果
+
+2026-11-13 在当前仓库代码与数据的临时副本中创建新虚拟环境，实际安装依赖、运行全量测试和脚本，并短暂启动 8010 服务。为遵守本次只改文档的范围，生成物和数据库未覆盖正式仓库。`/api/health`、`/api/scenarios`、`/workbench/` 均实测返回 200，列表包含六个案例书条目与 D1；D1 运行请求也返回 200。
+
+生成器七族各 200 个场景，共 1400 个；其中三个排序训练族按场景 80/20 切分为 480/120 个场景、960/240 行候选；其余 800 个场景用于契约校验。960/240 行是过滤前的数据文件行数，包含传播经过负例；实际测试排序池有 200 个保留独立候选。测试集同一保留独立来源池的结果如下，与仓库 [离线对比证据](evidence/model_comparison.json) 的数值一致：
+
+| 策略 | top-1 准确率 | MRR |
+|---|---:|---:|
+| 规则 | 0.666667 | 0.833333 |
+| 模型 | 1.000000 | 1.000000 |
+| 融合 | 1.000000 | 1.000000 |
+
+这不是业务结论准确率。测试场景中有 40 个只剩一个有效独立候选；离线融合用于比较，在线入口使用模型重排序，不默认应用融合。当前重排序契约汇总为 `total=6、order_changed=1、skipped=4`，S5 同时保存补数前后输出，汇总按其最新版计数。
+
+## 关键设计取舍
+
+1. **规则硬约束优先。** 基线、拓扑、时间窗口、缺测和传播经过决定可比较的候选池，模型不能把已排除项恢复成来源。
+2. **缺证据不猜。** 保留 `UNRESOLVED` 与多候选状态，把未知转为明确的证据缺口与下一步核查事项。
+3. **模型只重排。** 模型分数补充同池排序，逐特征贡献便于解释；它不改 status、conclusion、证据等级和排除依据。相同分数按 source_id 排序，保证确定性。
+4. **旧结论可回查。** 样本变化和重新归因追加版本，而非覆盖旧结果。迟到数据不能沿用旧实时事件链的丢弃策略。
 
 ## 已知限制
 
-1. **数据来源**：水文数据由 mqtt_node.py 模拟器随机生成，未接入真实传感器
-2. **ML 模型**：IsolationForest 训练数据仅 60 条历史样本，异常判断可能不够稳定；对未见数据可能误报或漏报
-3. **flowLevel 感知**：当前 source 为 `rule` 或 `simulated`（共同完成线），未使用真实视觉模型；confidence 为 null
-4. **移动端**：H5 页面需浏览器打开，非原生微信小程序
-5. **3D 场景**：简化河道模型，非真实地理数据
-6. **语音识别**：依赖浏览器 Web Speech API，Chrome 支持最好，Safari 部分功能受限
+- 全部训练和评估是程序化合成数据。seed 留出仅验证同一生成机制，不代表真实水体、新河道或新传播机制的效果；施工记录为 pending，仍需人工核查。
+- decoy 族的 time 特征区分度较强，可能高估泛化能力；topology 与 local_evidence 在当前数据中共线，系数不能作独立效应或因果解释。模型分数未校准。
+- 当前 Run Trace 输入快照保存 `history_samples/current_samples/target`，未冻结完整配置、代码和历史模型。归因原输出可回查；历史版本的重排序接口使用当前加载模型重新计算，不等于历史模型回放。
+- 补数接口以原场景的内存副本重新分析，替换该断面/指标的当前样本；数据库保留旧样本版本，但接口不会自动合并全部历次补数形成完整重放。分析时间仍是场景的固定 `analysis_time`，不是系统当前时间。
+- 当前为本机教学工作台，不承诺生产部署能力。旧 C02 功能保留，本次仅重跑旧规则，不把历史截图当作本次实时接入验收。
 
-## 开源库与资料来源
+## 主要目录
 
-| 库/工具 | 用途 | 来源 |
-|---------|------|------|
-| mosquitto | MQTT Broker | https://mosquitto.org/ |
-| paho-mqtt | Python MQTT 客户端 | https://www.eclipse.org/paho/ |
-| mqtt.js | 浏览器 MQTT 客户端 | https://github.com/mqttjs/MQTT.js |
-| pandas | 数据分析 | https://pandas.pydata.org/ |
-| matplotlib | 图表绘制 | https://matplotlib.org/ |
-| scikit-learn | IsolationForest 异常检测 | https://scikit-learn.org/ |
-| Three.js | 3D 渲染 | https://threejs.org/ |
-| Web Speech API | ASR + TTS | https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Speech_API |
+| 目录 | 说明 |
+|---|---|
+| `backend/` | Trace 基线、归因、SQLite、运行编排、模型及 API |
+| `data/` | 固定案例、自建对照、生成数据和本机运行数据库；JSONL 与数据库不入库 |
+| `models/` | 已训练、可序列化的重排序模型 |
+| `scripts/` | 模拟数据生成、训练、证据导出，以及保留的 C02 工具 |
+| `web/workbench/` | 当前 Trace 静态工作台；`web/` 其余内容为保留的 C02 页面 |
+| `python/` | C02 实时接入、旧告警规则等历史模块 |
+| `tests/` | Trace、持久化、API、工作台与模型契约测试 |
+| `docs/` | 复现步骤、阶段记录及模型解释 |
+| `evidence/` | 真实运行导出、阶段验证记录与页面截图 |
 
-## 回归测试
-```bash
-cd python && python3 rules.py
-```
+## 文档与证据索引
 
-## 提交物
-- GitHub 仓库：nova-tidewatch-final-2026
-- ≥5 次有意义 Commit
-- Evidence 目录
-- PPT（10-15 页）
-- 技术文档（10-15 页）
-- 演示视频（5-8 分钟）
+- [详细复现与常见问题](docs/reproduce.md)
+- [M0 基线与 C02 验证记录](docs/m0-baseline.md)：阶段历史记录，其中“尚未实现”等描述只对应当时范围。
+- [离线模型重排序说明](docs/model-reranking.md)：训练口径、特征与系数；其“未接入 API”描述为离线阶段记录，当前已提供受约束的在线重排序。
+- [提交索引](docs/commit-index.md)、[11 月 2 日协作记录](docs/ai-sessions-20261102.md)、[11 月 3 日协作记录](docs/ai-sessions-20261103.md)：过程资料，当前能力以实现、测试及本页为准。
+- [模型对比及逐场景结果](evidence/model_comparison.json)、[重排序契约与 D1 贡献](evidence/rerank_contract.json)
+- [S3 多候选输出](evidence/trace_s3_output.json)、[S4 对照输出](evidence/trace_s4_output.json)、[S5 缺证据输出](evidence/trace_s5_output.json)
+- [S5 持久化双版本](evidence/trace_run_s5_versions.json)、[S5 API 双版本证据链](evidence/trace_api_s5_evidence.json)
+- [工作台首屏](evidence/workbench_initial.png)、[S5 版本 1](evidence/workbench_s5_v1.png)、[S5 版本 2](evidence/workbench_s5_v2.png)、[D1 工作台](evidence/workbench_d1.png)：已有截图，不冒充本次重新截图。
+- [C02 历史证据索引](evidence/README.md)：其中 `evidence/D1/` 是旧测试编号，与当前自建场景 D1 不是同一概念。

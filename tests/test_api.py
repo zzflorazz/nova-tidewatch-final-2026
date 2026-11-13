@@ -30,9 +30,9 @@ def test_list_scenarios_returns_all_implemented(client):
     response = client.get("/api/scenarios")
     assert response.status_code == 200
     scenarios = response.json()
-    assert [s["scenario_id"] for s in scenarios] == ["S1", "S2", "S3", "S4a", "S4b", "S5"]
+    assert [s["scenario_id"] for s in scenarios] == ["S1", "S2", "S3", "S4a", "S4b", "S5", "D1"]
     assert all(s["status"] == "implemented" for s in scenarios)
-    assert all(set(s) == {"scenario_id", "status", "analysis_time", "target"} for s in scenarios)
+    assert all(set(s) == {"scenario_id", "status", "analysis_time", "target", "origin"} for s in scenarios)
     assert scenarios[0]["target"] is None
 
 

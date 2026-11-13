@@ -7,6 +7,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from .reranker import Reranker, rerank_attribution
@@ -16,6 +17,7 @@ from .trace_runner import run_attribution
 
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "trace_scenarios.json"
 DEFAULT_DB_PATH = Path(__file__).resolve().parents[1] / "data" / "trace.db"
+DEMO_PATH = Path(__file__).resolve().parents[1] / "data" / "demo_decoy_scenario.json"
 MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "reranker.json"
 
 
@@ -38,7 +40,11 @@ def load_reranker() -> Reranker:
 
 
 def load_scenarios() -> list[dict]:
-    return json.loads(DATA_PATH.read_text(encoding="utf-8"))["scenarios"]
+    scenarios = [{**s, "origin": "case_book"} for s in
+                 json.loads(DATA_PATH.read_text(encoding="utf-8"))["scenarios"]]
+    if DEMO_PATH.exists():
+        scenarios.append({**json.loads(DEMO_PATH.read_text(encoding="utf-8")), "origin": "self_built_demo"})
+    return scenarios
 
 
 def find_scenario(scenario_id: str) -> dict | None:
@@ -82,7 +88,7 @@ def create_app(db_path: str | None = None) -> FastAPI:
     @app.get("/api/scenarios")
     async def list_scenarios():
         return [
-            {key: scenario.get(key) for key in ("scenario_id", "status", "analysis_time", "target")}
+            {key: scenario.get(key) for key in ("scenario_id", "status", "analysis_time", "target", "origin")}
             for scenario in load_scenarios()
         ]
 
@@ -190,9 +196,17 @@ def create_app(db_path: str | None = None) -> FastAPI:
         expected_anomaly_id = f"{target['reach_id']}-{target['metric']}-{target['event_time']}"
         if expected_anomaly_id != anomaly_id:
             raise HTTPException(status_code=400, detail="场景目标异常与路径中的 anomaly_id 不匹配")
+        # One current observation per reach/metric is required by attribution.
+        # Only replace this analysis snapshot; persisted samples/versions remain.
+        key = (request.sample.get("reach_id"), request.sample.get("metric"))
+        scenario["current_samples"] = [s for s in scenario["current_samples"]
+                                       if (s["reach_id"], s["metric"]) != key]
         scenario["current_samples"].append(request.sample)
         return run_attribution(scenario, app.state.store)
 
+    app.mount("/workbench", StaticFiles(
+        directory=Path(__file__).resolve().parents[1] / "web" / "workbench", html=True
+    ), name="workbench")
     return app
 
 

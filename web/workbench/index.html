@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>TideWatch Trace V1.0 · 多断面异常溯源工作台</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">≈</span><h1>TideWatch Trace <span>V1.0 · 多断面异常溯源工作台</span></h1></div>
+    <span class="connection" id="connection" role="status">正在读取场景…</span>
+  </header>
+  <div class="simulation"><strong>SIMULATED</strong><span>全部数据为教学模拟，非真实水体观测</span></div>
+  <main class="workspace">
+    <aside class="sidebar" aria-labelledby="scenarios-heading">
+      <div class="section-heading"><h2 id="scenarios-heading">选择场景</h2><span id="scenario-count">—</span></div>
+      <p class="subtle sidebar-help">点击场景，运行归因并查看证据。</p>
+      <div id="scenario-list" aria-busy="true"><p class="subtle">正在加载场景列表…</p></div>
+      <button id="retry-list" class="retry" hidden>重新加载场景</button>
+      <p class="sidebar-footer">固定输入 · 可回查版本<br>候选排序不等于因果证明</p>
+    </aside>
+    <section id="results" class="results" aria-labelledby="results-heading" aria-busy="false">
+      <div class="section-heading"><h2 id="results-heading">归因结果</h2><span id="selection-label">尚未选择场景</span></div>
+      <div id="feedback" role="status" aria-live="polite"></div>
+      <div id="result-content">
+        <div class="empty-state">
+          <div class="empty-heading"><span class="line-label">从下游变化，回查上游证据</span><h3>异常出现在哪里，<br>证据支持哪个来源？</h3></div>
+          <div class="river" aria-label="水系拓扑：上游 reach-a 到中游 reach-b 到下游 reach-c">
+            <div><i></i><strong>reach-a</strong><span>上游断面</span></div><b aria-hidden="true">→</b>
+            <div><i></i><strong>reach-b</strong><span>中游断面</span></div><b aria-hidden="true">→</b>
+            <div><i></i><strong>reach-c</strong><span>下游断面</span></div>
+          </div>
+          <p>从左侧选择教学场景，查看断面健康、候选来源与排除依据。<br>证据不足时保留“来源未定”，不把相关性当作因果。</p>
+          <div class="empty-legend"><span>分断面历史基线</span><span>事件时间与传播窗口</span><span>模型仅重排序</span></div>
+        </div>
+      </div>
+      <section id="version-history" class="result-block" hidden aria-labelledby="version-heading">
+        <div class="section-heading"><h3 id="version-heading">版本历史</h3><span id="version-selection"></span></div>
+        <p class="subtle">点击版本回查当时的归因；历史结论保留，不覆盖。</p>
+        <div id="version-list" class="version-timeline"></div>
+      </section>
+      <section id="backfill-section" class="result-block backfill-section" hidden aria-labelledby="backfill-heading">
+        <h3 id="backfill-heading">追加迟到样本</h3>
+        <p class="backfill-note">模拟录入，仅用于演示迟到数据回补</p>
+        <p class="subtle form-help">默认填入目标断面。补回缺测数据时，请改为对应断面；时间须为带时区的 ISO8601，且不晚于场景分析时刻。</p>
+        <form id="backfill-form">
+          <div class="form-grid">
+            <label>断面 reach_id<input name="reach_id" required autocomplete="off"></label>
+            <label>指标 metric<input name="metric" required autocomplete="off"></label>
+            <label>数值 value<input name="value" type="number" step="any" required></label>
+            <label>来源 source<select name="source"><option value="manual">manual · 人工模拟录入</option><option value="simulated">simulated · 模拟样本</option></select></label>
+            <label>事件时间 event_time<input name="event_time" required placeholder="2026-11-02T14:25:00+08:00"></label>
+            <label>接收时间 received_time<input name="received_time" required placeholder="2026-11-02T14:34:00+08:00"></label>
+          </div>
+          <button type="submit" class="submit-backfill">追加样本并重新归因</button>
+          <p id="backfill-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+      <footer class="result-footer">TideWatch Trace · 结论来自同一次归因输出，模型不改变业务判断。</footer>
+    </section>
+  </main>
+  <noscript>工作台需要启用 JavaScript，才能读取场景与运行归因。</noscript>
+</body>
+</html>
